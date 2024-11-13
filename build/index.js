@@ -29,6 +29,7 @@ function main(args) {
             const page = yield browser.newPage();
             const traceReceiver = new TraceReceiver_1.default(outputDir);
             yield new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                yield page.addInitScript(headerCode);
                 yield page.exposeFunction("$$__playwrightLog", (msg) => {
                     traceReceiver.processMessage(msg);
                 });
@@ -37,7 +38,8 @@ function main(args) {
                 });
                 yield page.route(() => true, (route, request) => __awaiter(this, void 0, void 0, function* () {
                     if (request.resourceType() === "document") {
-                        (0, rewrite_1.rewrite)(route, (buf) => (0, rewriting_proxy_1.rewriteHTML)(buf, request.url(), jalangi_exports_1.default.rewriter, `<script>${headerCode}</script>`, undefined, // headerURLs,
+                        (0, rewrite_1.rewrite)(route, (buf) => (0, rewriting_proxy_1.rewriteHTML)(buf, request.url(), jalangi_exports_1.default.rewriter, undefined, // `<script>${headerCode}</script>`, // headerHTML
+                        undefined, // headerURLs,
                         undefined // rewriteOptions
                         ));
                     }

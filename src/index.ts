@@ -19,6 +19,8 @@ async function main(args: string[]) {
     const traceReceiver = new TraceReceiver(outputDir);
 
     await new Promise<void>(async (resolve) => {
+      await page.addInitScript(headerCode);
+
       await page.exposeFunction("$$__playwrightLog", (msg: string) => {
         traceReceiver.processMessage(msg);
       });
@@ -36,7 +38,7 @@ async function main(args: string[]) {
                 buf,
                 request.url(),
                 jalangiExports.rewriter,
-                `<script>${headerCode}</script>`,
+                undefined, // `<script>${headerCode}</script>`, // headerHTML
                 undefined, // headerURLs,
                 undefined // rewriteOptions
               )
