@@ -105,14 +105,14 @@
 //        if (record[F_FUNNAME] === N_LOG_SCRIPT_ENTER) {
 //            ++count;
 //        }
-        writeLine("J$.addRecord("+JSON.stringify(line)+");")
+        writeLine("JRR$.addRecord("+JSON.stringify(line)+");")
     }
     traceRfh.close();
 
 //    writeLine('try {');
-    writeLine('J$.replay();');
+    writeLine('JRR$.replay();');
 //    writeLine('} finally {');
-//    writeLine('J$.endExecution();');
+//    writeLine('JRR$.endExecution();');
 //    writeLine('}');
     writeLine('</script>');
 

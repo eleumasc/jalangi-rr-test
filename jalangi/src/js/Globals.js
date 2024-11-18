@@ -1,5 +1,5 @@
-if (typeof J$ === 'undefined') {
-    J$ = {};
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 
@@ -14,4 +14,4 @@ if (typeof J$ === 'undefined') {
     Globals.traceWriter;
     Globals.loadAndBranchLogs = [];
 
-}(J$));
+}(JRR$));

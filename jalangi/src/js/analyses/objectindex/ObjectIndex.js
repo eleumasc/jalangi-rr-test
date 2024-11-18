@@ -374,6 +374,6 @@
         });
     }
 
-}(J$));
+}(JRR$));
 
 // test with python scripts/jalangi.py direct --analysis src/js/analyses/objectindex/ObjectIndex.js tests/unit/oindex1

@@ -64,4 +64,4 @@
     }
 
     sandbox.analysis = new CoverageEngine();
-}(J$));
+}(JRR$));

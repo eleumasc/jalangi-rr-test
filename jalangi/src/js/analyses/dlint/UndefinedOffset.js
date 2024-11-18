@@ -126,4 +126,4 @@
 
 //    sandbox.analysis = new UndefinedOffset();
     sandbox.analysis = new UndefinedOffset();
-}(J$));
+}(JRR$));

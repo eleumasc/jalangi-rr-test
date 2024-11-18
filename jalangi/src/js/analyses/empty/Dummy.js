@@ -17,4 +17,4 @@
             }
         });
     }
-})(typeof J$ === 'undefined'? (J$={}):J$));
+})(typeof JRR$ === 'undefined'? (JRR$={}):JRR$));

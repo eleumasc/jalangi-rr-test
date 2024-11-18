@@ -137,7 +137,7 @@ function instrument(inputFileName, options) {
  * @param instHandler
  */
 function setupConfig(instHandler) {
-    var conf = J$.Config;
+    var conf = JRR$.Config;
     conf.INSTR_READ = instHandler.instrRead;
     conf.INSTR_WRITE = instHandler.instrWrite;
     conf.INSTR_GETFIELD = instHandler.instrGetfield;
@@ -153,7 +153,7 @@ function setupConfig(instHandler) {
  * clear any configured instrumentation control functions from the global Config object
  */
 function clearConfig() {
-    var conf = J$.Config;
+    var conf = JRR$.Config;
     conf.INSTR_READ = null;
     conf.INSTR_WRITE = null;
     conf.INSTR_GETFIELD = null;

@@ -21,7 +21,7 @@ module.exports = function (sandbox) {
     var PredValues = require('./PredValues');
     var EVAL_ORG = eval;
 
-    var PREFIX1 = "J$";
+    var PREFIX1 = "JRR$";
     var SPECIAL_PROP2 = "*" + PREFIX1 + "I*";
     var N_LOG_FUNCTION_LIT = 12;
     var STATS_FILE_NAME = "jalangi_multiex_stats";
@@ -107,8 +107,8 @@ module.exports = function (sandbox) {
 
     function makeSymbolicString(idx) {
         var ret = new SymbolicStringExpression(idx);
-        J$.addAxiom(B(0, ">=", ret.getLength(), 0));
-        J$.addAxiom(B(0, "<=", ret.getLength(), MAX_STRING_LENGTH));
+        JRR$.addAxiom(B(0, ">=", ret.getLength(), 0));
+        JRR$.addAxiom(B(0, "<=", ret.getLength(), MAX_STRING_LENGTH));
         return ret;
     }
 
@@ -372,8 +372,8 @@ module.exports = function (sandbox) {
         if (!flag) {
             return String.fromCharCode.apply(this, arguments);
         }
-        var newSym = J$.readInput("", true);
-        J$.addAxiom(new FromCharCodePredicate(ints, newSym));
+        var newSym = JRR$.readInput("", true);
+        JRR$.addAxiom(new FromCharCodePredicate(ints, newSym));
         return newSym;
     }
 
@@ -382,12 +382,12 @@ module.exports = function (sandbox) {
         var newSym;
 
 //        if (isSymbolic(str) && str.isCompound && str.isCompound()) {
-        newSym = J$.readInput("", true);
-        J$.addAxiom(J$.B(0, "==", newSym, str));
+        newSym = JRR$.readInput("", true);
+        JRR$.addAxiom(JRR$.B(0, "==", newSym, str));
 //        } else {
 //            newSym = str;
 //        }
-        return J$.B(0, "regexin", newSym, this);
+        return JRR$.B(0, "regexin", newSym, this);
     }
 
     function getSingle(f) {
@@ -412,8 +412,8 @@ module.exports = function (sandbox) {
             return regexp_test;
         } else if (f === String.fromCharCode) {
             return string_fromCharCode;
-        } else if (f === J$.addAxiom ||
-            f === J$.readInput) {
+        } else if (f === JRR$.addAxiom ||
+            f === JRR$.readInput) {
             return f;
         } else if (f === Math.abs ||
             f === Math.acos ||
@@ -508,7 +508,7 @@ module.exports = function (sandbox) {
 
 
     function invokeEval(base, f, args) {
-        return f.call(base, J$.instrumentCode(args[0], {wrapProgram:false}).code);
+        return f.call(base, JRR$.instrumentCode(args[0], {wrapProgram:false}).code);
     }
 
 
@@ -726,15 +726,15 @@ module.exports = function (sandbox) {
 
     function symbolicIntToString(num) {
         //var c = num.substitute(getFullSolution(sandbox.getCurrentSolution()));
-        var newSym = J$.readInput("", true);
-        J$.addAxiom(new ToStringPredicate(num, newSym));
+        var newSym = JRR$.readInput("", true);
+        JRR$.addAxiom(new ToStringPredicate(num, newSym));
         return newSym;
     }
 
     function symbolicStringToInt(str) {
 //        var s = str.substitute(getFullSolution(sandbox.getCurrentSolution()));
-        var newSym = J$.readInput(0, true);
-        J$.addAxiom(new ToStringPredicate(newSym, str));
+        var newSym = JRR$.readInput(0, true);
+        JRR$.addAxiom(new ToStringPredicate(newSym, str));
         return newSym;
     }
 

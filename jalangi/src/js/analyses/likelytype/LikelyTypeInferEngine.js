@@ -100,7 +100,7 @@
                     ret = new ConcolicValue(obj, s);
                     getSetFields(iidToFieldTypes, s, obj);
                     for (i in obj) {
-                        if (HOP(obj, i) && i !== "*J$*" && i !== "*J$I*" && i !== "*J$C*") {
+                        if (HOP(obj, i) && i !== "*JRR$*" && i !== "*JRR$I*" && i !== "*JRR$C*") {
                             updateType(ret, i, obj[i], creationLocation, s);
                         }
                     }
@@ -558,4 +558,4 @@
 
     sandbox.analysis = new LikelyTypeInferEngine();
 
-}(J$));
+}(JRR$));

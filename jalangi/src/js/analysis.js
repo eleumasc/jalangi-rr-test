@@ -18,21 +18,21 @@
 
 
 /*
- To perform analysis in browser without recording, set window.JALANGI_MODE to 'inbrowser' and J$.analysis to a suitable analysis file.
- In the inbrowser mode, one has access to the object J$.smemory, which denotes the shadow memory.
+ To perform analysis in browser without recording, set window.JALANGI_MODE to 'inbrowser' and JRR$.analysis to a suitable analysis file.
+ In the inbrowser mode, one has access to the object JRR$.smemory, which denotes the shadow memory.
  smemory.getShadowObject(obj) returns the shadow object associated with obj if type of obj is "object" or "function".
  smemory.getFrame(varName) returns the activation frame that contains the variable named "varName".
- To redefine all instrumentation functions, set JALANGI_MODE to 'symbolic' and J$.analysis to a suitable library containing redefinitions of W, R, etc.
+ To redefine all instrumentation functions, set JALANGI_MODE to 'symbolic' and JRR$.analysis to a suitable library containing redefinitions of W, R, etc.
 
  */
 
 /*jslint node: true browser: true */
-/*global J$ alert */
+/*global JRR$ alert */
 
 // wrap in anonymous function to create local namespace when in browser
-// create / reset J$ global variable to hold analysis runtime
-if (typeof J$ === 'undefined') {
-    J$ = {};
+// create / reset JRR$ global variable to hold analysis runtime
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 window = {String:String, Array:Array, Error:Error, Number:Number, Date:Date, Boolean:Boolean, RegExp:RegExp};
@@ -455,7 +455,7 @@ window = {String:String, Array:Array, Error:Error, Number:Number, Date:Date, Boo
                     rrEngine.RR_Load(iid);
                 }
 
-                printValueForTesting("J$.G", iid, val);
+                printValueForTesting("JRR$.G", iid, val);
                 return val;
             }
 
@@ -732,7 +732,7 @@ window = {String:String, Array:Array, Error:Error, Number:Number, Date:Date, Boo
                         rrEngine.RR_updateRecordedObject(val);
                     }
                 }
-                printValueForTesting("J$.R", iid, val);
+                printValueForTesting("JRR$.R", iid, val);
                 return val;
             }
 
@@ -1058,7 +1058,7 @@ window = {String:String, Array:Array, Error:Error, Number:Number, Date:Date, Boo
                 if (branchCoverageInfo) {
                     branchCoverageInfo.updateBranchInfo(iid, ret);
                 }
-                printValueForTesting("J$.C2", iid, left_c ? 1 : 0);
+                printValueForTesting("JRR$.C2", iid, left_c ? 1 : 0);
                 return left_c;
             };
 
@@ -1093,7 +1093,7 @@ window = {String:String, Array:Array, Error:Error, Number:Number, Date:Date, Boo
                     branchCoverageInfo.updateBranchInfo(iid, ret);
                 }
 
-                printValueForTesting("J$.C ", iid, left_c ? 1 : 0);
+                printValueForTesting("JRR$.C ", iid, left_c ? 1 : 0);
                 return left_c;
             }
 
@@ -1214,11 +1214,11 @@ window = {String:String, Array:Array, Error:Error, Number:Number, Date:Date, Boo
         init(global.JALANGI_MODE, global.ANALYSIS_SCRIPT, global.USE_SMEMORY);
     }
 
-})(J$);
+})(JRR$);
 
 
 //@todo:@assumption arguments.callee is available
-//@todo:@assumptions SPECIAL_PROP = "*J$*" is added to every object, but its enumeration is avoided in instrumented code
+//@todo:@assumptions SPECIAL_PROP = "*JRR$*" is added to every object, but its enumeration is avoided in instrumented code
 //@todo:@assumptions ReferenceError when accessing an undeclared uninitialized variable won't be thrown
 //@todo:@assumption window.x is not initialized in node.js replay mode when var x = e is done in the global scope, but handled using syncValues
 //@todo:@assumption eval is not renamed

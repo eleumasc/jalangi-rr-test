@@ -7,124 +7,124 @@
 
     sandbox.string_indexOf = function(str, startPos) {
         var reg = new RegExp(".*"+regex_escape(str)+".*");
-        var ret = J$.readInput(0,true);
+        var ret = JRR$.readInput(0,true);
 
         startPos = startPos | 0;
 
-        J$.addAxiom("begin");
-        J$.addAxiom("begin");
-        var T = J$.readInput("", true);
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
-        var pos = J$.readInput(0,true);
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom("begin");
+        var T = JRR$.readInput("", true);
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
+        var pos = JRR$.readInput(0,true);
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(startPos < this.length);
-        J$.addAxiom(startPos >= 0);
-        J$.addAxiom(pos === startPos);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(startPos < this.length);
+        JRR$.addAxiom(startPos >= 0);
+        JRR$.addAxiom(pos === startPos);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(startPos < 0);
-        J$.addAxiom(pos === 0);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(startPos < 0);
+        JRR$.addAxiom(pos === 0);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(startPos >= this.length);
-        J$.addAxiom(pos === this.length);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(startPos >= this.length);
+        JRR$.addAxiom(pos === this.length);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
-
-
-        J$.addAxiom(pos === T.length);
-        J$.addAxiom(this === (T + S1 + str + S2));
-        J$.addAxiom(ret === pos + S1.length);
-        J$.addAxiom(!reg.test(S1));
-        J$.addAxiom("and");
+        JRR$.addAxiom("or");
 
 
-        J$.addAxiom("begin");
-        J$.addAxiom(ret===-1);
-        J$.addAxiom(!reg.test(this));
-        J$.addAxiom("and");
+        JRR$.addAxiom(pos === T.length);
+        JRR$.addAxiom(this === (T + S1 + str + S2));
+        JRR$.addAxiom(ret === pos + S1.length);
+        JRR$.addAxiom(!reg.test(S1));
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
+
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(ret===-1);
+        JRR$.addAxiom(!reg.test(this));
+        JRR$.addAxiom("and");
+
+        JRR$.addAxiom("or");
         return ret;
     }
 
     sandbox. string_lastIndexOf = function(str, startPos) {
         var reg = new RegExp(".*"+regex_escape(str)+".*");
-        var ret = J$.readInput(0,true);
+        var ret = JRR$.readInput(0,true);
 
         if (arguments.length <= 1) {
             startPos = this.length - 1;
         }
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        var T = J$.readInput("", true);
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
-        var pos = J$.readInput(0,true);
+        JRR$.addAxiom("begin");
+        var T = JRR$.readInput("", true);
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
+        var pos = JRR$.readInput(0,true);
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(startPos < this.length);
-        J$.addAxiom(startPos >= 0);
-        J$.addAxiom(pos === startPos);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(startPos < this.length);
+        JRR$.addAxiom(startPos >= 0);
+        JRR$.addAxiom(pos === startPos);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(startPos < 0);
-        J$.addAxiom(pos === -1);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(startPos < 0);
+        JRR$.addAxiom(pos === -1);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(startPos >= this.length);
-        J$.addAxiom(pos === this.length-1);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(startPos >= this.length);
+        JRR$.addAxiom(pos === this.length-1);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
 
-        J$.addAxiom(pos === this.length - T.length -1);
-        J$.addAxiom(this === (S1 + str + S2 + T));
-        J$.addAxiom(ret === S1.length);
-        J$.addAxiom(!reg.test(S2));
-        J$.addAxiom("and");
+        JRR$.addAxiom(pos === this.length - T.length -1);
+        JRR$.addAxiom(this === (S1 + str + S2 + T));
+        JRR$.addAxiom(ret === S1.length);
+        JRR$.addAxiom(!reg.test(S2));
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(ret===-1);
-        J$.addAxiom(!reg.test(this));
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(ret===-1);
+        JRR$.addAxiom(!reg.test(this));
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
         return ret;
     }
 
 
     sandbox.string_charCodeAt = function(idx) {
-        var ret = J$.readInput(0,true);
+        var ret = JRR$.readInput(0,true);
         var c = this.substring(idx, idx + 1);
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(c !== '');
-        J$.addAxiom(c === String.fromCharCode(ret));
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(c !== '');
+        JRR$.addAxiom(c === String.fromCharCode(ret));
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(c === '');
-        J$.addAxiom(ret === -100000); // @todo should be NaN, but no way to model NaN.
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(c === '');
+        JRR$.addAxiom(ret === -100000); // @todo should be NaN, but no way to model NaN.
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
         return ret;
 
@@ -136,141 +136,141 @@
             end = this.length;
         }
 
-        var ret = J$.readInput("",true);
+        var ret = JRR$.readInput("",true);
 
-        J$.addAxiom("begin");
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
-        var s = J$.readInput(0,true);
-        var e = J$.readInput(0,true);
+        JRR$.addAxiom("begin");
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
+        var s = JRR$.readInput(0,true);
+        var e = JRR$.readInput(0,true);
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start >= 0);
-        J$.addAxiom(start < this.length);
-        J$.addAxiom(s === start);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start >= 0);
+        JRR$.addAxiom(start < this.length);
+        JRR$.addAxiom(s === start);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start < 0);
-        J$.addAxiom(s === 0);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start < 0);
+        JRR$.addAxiom(s === 0);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start >= this.length);
-        J$.addAxiom(s === this.length);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start >= this.length);
+        JRR$.addAxiom(s === this.length);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(end >= 0);
-        J$.addAxiom(end < this.length);
-        J$.addAxiom(e === end);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(end >= 0);
+        JRR$.addAxiom(end < this.length);
+        JRR$.addAxiom(e === end);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(end < 0);
-        J$.addAxiom(e === 0);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(end < 0);
+        JRR$.addAxiom(e === 0);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(end >= this.length);
-        J$.addAxiom(e === this.length);
-        J$.addAxiom("and");
-
-
-        J$.addAxiom("or");
-
-        J$.addAxiom("begin");
-
-        J$.addAxiom("begin");
-        J$.addAxiom(s <= e);
-        J$.addAxiom(this === S1 + ret + S2);
-        J$.addAxiom(s === S1.length);
-        J$.addAxiom(e - s === ret.length);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(end >= this.length);
+        JRR$.addAxiom(e === this.length);
+        JRR$.addAxiom("and");
 
 
-        J$.addAxiom("begin");
-        J$.addAxiom(s > e);
-        J$.addAxiom(ret === "");
-        J$.addAxiom("and");
+        JRR$.addAxiom("or");
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(s <= e);
+        JRR$.addAxiom(this === S1 + ret + S2);
+        JRR$.addAxiom(s === S1.length);
+        JRR$.addAxiom(e - s === ret.length);
+        JRR$.addAxiom("and");
+
+
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(s > e);
+        JRR$.addAxiom(ret === "");
+        JRR$.addAxiom("and");
+
+        JRR$.addAxiom("or");
+
+        JRR$.addAxiom("and");
 
         return ret;
     }
 
     sandbox.string_substr = function(start, length) {
 
-        var ret = J$.readInput("",true);
+        var ret = JRR$.readInput("",true);
 
-        J$.addAxiom("begin");
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
-        var s = J$.readInput(0,true);
-        var l = J$.readInput(0,true);
+        JRR$.addAxiom("begin");
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
+        var s = JRR$.readInput(0,true);
+        var l = JRR$.readInput(0,true);
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start >= 0);
-        J$.addAxiom(start < this.length);
-        J$.addAxiom(s === start);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start >= 0);
+        JRR$.addAxiom(start < this.length);
+        JRR$.addAxiom(s === start);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start >= this.length);
-        J$.addAxiom(s === this.length);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start >= this.length);
+        JRR$.addAxiom(s === this.length);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start < 0);
-        J$.addAxiom(start >= - this.length);
-        J$.addAxiom(s === this.length + start);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start < 0);
+        JRR$.addAxiom(start >= - this.length);
+        JRR$.addAxiom(s === this.length + start);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start < -this.length);
-        J$.addAxiom(s === 0);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start < -this.length);
+        JRR$.addAxiom(s === 0);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(length >= 0);
-        J$.addAxiom(length <= this.length - s);
-        J$.addAxiom(l === length);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(length >= 0);
+        JRR$.addAxiom(length <= this.length - s);
+        JRR$.addAxiom(l === length);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(length < 0);
-        J$.addAxiom(l === 0);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(length < 0);
+        JRR$.addAxiom(l === 0);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(length > this.length - s);
-        J$.addAxiom(l === this.length - s);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(length > this.length - s);
+        JRR$.addAxiom(l === this.length - s);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(this === S1 + ret + S2);
-        J$.addAxiom(s === S1.length);
-        J$.addAxiom(l === ret.length);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(this === S1 + ret + S2);
+        JRR$.addAxiom(s === S1.length);
+        JRR$.addAxiom(l === ret.length);
+        JRR$.addAxiom("and");
 
 
-        J$.addAxiom("and");
+        JRR$.addAxiom("and");
 
         return ret;
     }
@@ -279,34 +279,34 @@
     sandbox.string_charAt = function(start) {
         // assuming start >= 0 and end >= start and end === undefined or end <= this.length
 
-        var ret = J$.readInput("",true);
+        var ret = JRR$.readInput("",true);
 
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
 
-        J$.addAxiom("begin");
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
+        JRR$.addAxiom("begin");
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
 
-        J$.addAxiom(start >= 0);
-        J$.addAxiom(start < this.length);
-        J$.addAxiom(this === S1 + ret + S2);
-        J$.addAxiom(start === S1.length);
-        J$.addAxiom(ret.length === 1);
-        J$.addAxiom("and");
+        JRR$.addAxiom(start >= 0);
+        JRR$.addAxiom(start < this.length);
+        JRR$.addAxiom(this === S1 + ret + S2);
+        JRR$.addAxiom(start === S1.length);
+        JRR$.addAxiom(ret.length === 1);
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start < 0);
-        J$.addAxiom(ret === "");
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start < 0);
+        JRR$.addAxiom(ret === "");
+        JRR$.addAxiom("and");
 
-        J$.addAxiom("begin");
-        J$.addAxiom(start >= this.length);
-        J$.addAxiom(ret === "");
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(start >= this.length);
+        JRR$.addAxiom(ret === "");
+        JRR$.addAxiom("and");
 
 
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
 
         return ret;
@@ -314,26 +314,26 @@
 
 
     sandbox.builtin_parseInt = function(s) {
-        var ret = J$.readInput(0,true);
+        var ret = JRR$.readInput(0,true);
 
-        J$.addAxiom("begin");
-        J$.addAxiom(ret === s * 1);
-        J$.addAxiom("and");
+        JRR$.addAxiom("begin");
+        JRR$.addAxiom(ret === s * 1);
+        JRR$.addAxiom("and");
 
         return ret;
     }
 
     sandbox.object_getField = function(base, offset) {
-        var ret = J$.readInput(0,true);
+        var ret = JRR$.readInput(0,true);
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
         for (var i in base) {
-            J$.addAxiom("begin");
-            J$.addAxiom(i === offset+"");
-            J$.addAxiom(ret === base[i]);
-            J$.addAxiom("and");
+            JRR$.addAxiom("begin");
+            JRR$.addAxiom(i === offset+"");
+            JRR$.addAxiom(ret === base[i]);
+            JRR$.addAxiom("and");
         }
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
         return ret;
 

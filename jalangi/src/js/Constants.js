@@ -1,5 +1,5 @@
-if (typeof J$ === 'undefined') {
-    J$ = {};
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 (function (sandbox) {
@@ -20,7 +20,7 @@ if (typeof J$ === 'undefined') {
     Constants.HAS_OWN_PROPERTY_CALL = Object.prototype.hasOwnProperty.call;
 
 
-    var PREFIX1 = "J$";
+    var PREFIX1 = "JRR$";
     Constants.SPECIAL_PROP = "*" + PREFIX1 + "*";
     Constants.SPECIAL_PROP2 = "*" + PREFIX1 + "I*";
     Constants.SPECIAL_PROP3 = "*" + PREFIX1 + "C*";
@@ -166,5 +166,5 @@ if (typeof J$ === 'undefined') {
         }
     }
 
-})(J$);
+})(JRR$);
 

@@ -124,4 +124,4 @@
     }
 
     sandbox.analysis = new WrapperEngine();
-}(J$));
+}(JRR$));

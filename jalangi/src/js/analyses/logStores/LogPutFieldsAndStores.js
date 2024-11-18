@@ -155,4 +155,4 @@
 
 //    sandbox.analysis = new UndefinedOffset();
     sandbox.analysis = new LogPutFieldsAndStores();
-}(J$));
+}(JRR$));

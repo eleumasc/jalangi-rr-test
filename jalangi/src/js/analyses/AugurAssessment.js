@@ -2,13 +2,16 @@
   var document = (global.document = global.document || {});
   var fetch = (global.fetch = global.fetch || function fetch() {});
 
-  function __AUGUR_SOURCE__(x, _type) {
+  function __AUGUR_SOURCE__(x) {
+    require('fs').appendFileSync('/home/osboxes/jalangi-rr-test/jalangi/out.txt', `__AUGUR_SOURCE__ ${JSON.stringify(x)}\n`);
     return x;
   }
 
-  function __AUGUR_SINK__(_x, _type) {}
+  function __AUGUR_SINK__(x) {
+    require('fs').appendFileSync('/home/osboxes/jalangi-rr-test/jalangi/out.txt', `__AUGUR_SINK__ ${JSON.stringify(x)}\n`);
+  }
 
-  function MakeTainted() {
+  function AugurAssessment() {
     this.makeConcolic = function (idx, val, getNextSymbol) {
       return val;
     };
@@ -19,7 +22,7 @@
 
     this.invokeFun = function (iid, f, base, args, val, isConstructor) {
       if (f === fetch) {
-        __AUGUR_SINK__(args[0] /* url */, "fetch");
+        __AUGUR_SINK__(args[0] /* url */);
       }
 
       return val;
@@ -27,7 +30,7 @@
 
     this.getField = function (iid, base, offset, val) {
       if (base === document && offset === "cookie") {
-        __AUGUR_SOURCE__(val, "document.cookie");
+        return __AUGUR_SOURCE__(val);
       }
 
       return val;
@@ -75,5 +78,5 @@
     };
   }
 
-  sandbox.analysis = new MakeTainted();
-})(J$);
+  sandbox.analysis = new AugurAssessment();
+})(JRR$);

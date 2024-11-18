@@ -45,11 +45,11 @@
                 var ret = 0, len = this.list.length, val;
                 for(var i=0; i<len; i++) {
                     val = this.list[i];
-                    val = J$.G(0,val,"length", true);
+                    val = JRR$.G(0,val,"length", true);
                     if (i === 0) {
                         ret = val;
                     } else {
-                        ret = J$.B(0,"+", ret, val);
+                        ret = JRR$.B(0,"+", ret, val);
                     }
                 }
                 return ret;

@@ -78,7 +78,7 @@
         this.endExecution = function() {};
     }
     sandbox.analysis = new MyAnalysis();
-})(J$);
+})(JRR$);
 
 
 

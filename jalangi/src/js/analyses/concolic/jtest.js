@@ -17,7 +17,7 @@
 // Author: Koushik Sen
 
 try {
-    if (J$) {
+    if (JRR$) {
         require('./test_jalangi_');
     }
 } catch(e) {

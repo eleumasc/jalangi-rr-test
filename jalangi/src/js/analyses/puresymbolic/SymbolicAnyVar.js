@@ -28,7 +28,7 @@
         }
         this.isInitialized = isUndefined;
         if (!isUndefined) {
-            this.idx = J$.getNextSymbol();
+            this.idx = JRR$.getNextSymbol();
         }
     }
 
@@ -38,7 +38,7 @@
         initialize: function(val) {
             this.isInitialized = true;
             if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
-                this.value = J$.readInput(val, false, this.idx);
+                this.value = JRR$.readInput(val, false, this.idx);
             } else {
                 this.value = val;
             }

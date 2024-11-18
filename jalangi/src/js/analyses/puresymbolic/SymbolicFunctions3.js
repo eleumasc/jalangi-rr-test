@@ -10,10 +10,10 @@
         startPos = startPos | 0;
 
         if (reg.test(this)) {
-            var T = J$.readInput("", true);
-            var S1 = J$.readInput("",true);
-            var S2 = J$.readInput("",true);
-            var pos = J$.readInput(0,true);
+            var T = JRR$.readInput("", true);
+            var S1 = JRR$.readInput("",true);
+            var S2 = JRR$.readInput("",true);
+            var pos = JRR$.readInput(0,true);
 
             if (startPos < 0) {
                 pos = 0;
@@ -23,9 +23,9 @@
                 pos = startPos;
             }
 
-            J$.addAxiom(pos === T.length);
-            J$.addAxiom(this === (T + S1 + str + S2));
-            J$.addAxiom(!reg.test(S1));
+            JRR$.addAxiom(pos === T.length);
+            JRR$.addAxiom(this === (T + S1 + str + S2));
+            JRR$.addAxiom(!reg.test(S1));
             return pos + S1.length;
         } else {
             return -1;
@@ -40,10 +40,10 @@
         }
 
         if (reg.test(this)) {
-            var T = J$.readInput("", true);
-            var S1 = J$.readInput("",true);
-            var S2 = J$.readInput("",true);
-            var pos = J$.readInput(0,true);
+            var T = JRR$.readInput("", true);
+            var S1 = JRR$.readInput("",true);
+            var S2 = JRR$.readInput("",true);
+            var pos = JRR$.readInput(0,true);
 
             if (startPos < 0){
                 pos = -1;
@@ -52,9 +52,9 @@
             } else {
                 pos = startPos;
             }
-            J$.addAxiom(pos === this.length - T.length -1);
-            J$.addAxiom(this === (S1 + str + S2 + T));
-            J$.addAxiom(!reg.test(S2));
+            JRR$.addAxiom(pos === this.length - T.length -1);
+            JRR$.addAxiom(this === (S1 + str + S2 + T));
+            JRR$.addAxiom(!reg.test(S2));
             return S1.length;
         } else {
             return -1;
@@ -63,13 +63,13 @@
 
 
     sandbox.string_charCodeAt = function(idx) {
-        var ret = J$.readInput(0,true);
+        var ret = JRR$.readInput(0,true);
         var c = this.substring(idx, idx + 1);
 
         if (c !== ''){
-            J$.addAxiom(c === String.fromCharCode(ret));
+            JRR$.addAxiom(c === String.fromCharCode(ret));
         } else {
-            J$.addAxiom(ret === -100000);
+            JRR$.addAxiom(ret === -100000);
         } // @todo should be NaN, but no way to model NaN.
 
         return ret;
@@ -82,11 +82,11 @@
             end = this.length;
         }
 
-        var ret = J$.readInput("",true);
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
-        var s = J$.readInput(0,true);
-        var e = J$.readInput(0,true);
+        var ret = JRR$.readInput("",true);
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
+        var s = JRR$.readInput(0,true);
+        var e = JRR$.readInput(0,true);
 
         if (start < 0) {
             s = 0;
@@ -103,23 +103,23 @@
             e = end;
         }
         if (s <= e) {
-            J$.addAxiom(this === S1 + ret + S2);
-            J$.addAxiom(s === S1.length);
-            J$.addAxiom(e - s === ret.length);
+            JRR$.addAxiom(this === S1 + ret + S2);
+            JRR$.addAxiom(s === S1.length);
+            JRR$.addAxiom(e - s === ret.length);
         } else {
-            J$.addAxiom(ret === "");
+            JRR$.addAxiom(ret === "");
         }
         return ret;
     }
 
     sandbox.string_substr = function(start, length) {
 
-        var ret = J$.readInput("",true);
+        var ret = JRR$.readInput("",true);
 
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
-        var s = J$.readInput(0,true);
-        var l = J$.readInput(0,true);
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
+        var s = JRR$.readInput(0,true);
+        var l = JRR$.readInput(0,true);
 
         if (start >= this.length) {
             s = this.length;
@@ -137,9 +137,9 @@
         } else {
             l = length;
         }
-        J$.addAxiom(this === S1 + ret + S2);
-        J$.addAxiom(s === S1.length);
-        J$.addAxiom(l === ret.length);
+        JRR$.addAxiom(this === S1 + ret + S2);
+        JRR$.addAxiom(s === S1.length);
+        JRR$.addAxiom(l === ret.length);
 
         return ret;
     };
@@ -148,18 +148,18 @@
     sandbox.string_charAt = function(start) {
         // assuming start >= 0 and end >= start and end === undefined or end <= this.length
 
-        var ret = J$.readInput("",true);
-        var S1 = J$.readInput("",true);
-        var S2 = J$.readInput("",true);
+        var ret = JRR$.readInput("",true);
+        var S1 = JRR$.readInput("",true);
+        var S2 = JRR$.readInput("",true);
 
         if (start < 0) {
-            J$.addAxiom(ret === "");
+            JRR$.addAxiom(ret === "");
         } else if (start >= this.length) {
-            J$.addAxiom(ret === "");
+            JRR$.addAxiom(ret === "");
         } else {
-            J$.addAxiom(this === S1 + ret + S2);
-            J$.addAxiom(start === S1.length);
-            J$.addAxiom(ret.length === 1);
+            JRR$.addAxiom(this === S1 + ret + S2);
+            JRR$.addAxiom(start === S1.length);
+            JRR$.addAxiom(ret.length === 1);
 
         }
         return ret;
@@ -167,22 +167,22 @@
 
 
     sandbox.builtin_parseInt = function(s) {
-        var ret = J$.readInput(0,true);
-        J$.addAxiom(ret === s * 1);
+        var ret = JRR$.readInput(0,true);
+        JRR$.addAxiom(ret === s * 1);
         return ret;
     }
 
     sandbox.object_getField = function(base, offset) {
-        var ret = J$.readInput(0,true);
+        var ret = JRR$.readInput(0,true);
 
-        J$.addAxiom("begin");
+        JRR$.addAxiom("begin");
         for (var i in base) {
-            J$.addAxiom("begin");
-            J$.addAxiom(i === offset+"");
-            J$.addAxiom(ret === base[i]);
-            J$.addAxiom("and");
+            JRR$.addAxiom("begin");
+            JRR$.addAxiom(i === offset+"");
+            JRR$.addAxiom(ret === base[i]);
+            JRR$.addAxiom("and");
         }
-        J$.addAxiom("or");
+        JRR$.addAxiom("or");
 
         return ret;
 

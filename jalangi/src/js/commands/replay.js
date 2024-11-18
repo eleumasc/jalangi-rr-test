@@ -17,7 +17,7 @@
 // Author: Koushik Sen
 
 /*jslint node: true */
-/*global J$ */
+/*global JRR$ */
 var DEFAULT_TRACE_FILE_NAME = 'jalangi_trace';
 
 var argparse = require('argparse');
@@ -52,21 +52,21 @@ function runAnalysis(initParam) {
             // The old interface for analyses was to return a Constructor.
             // Continue to support this interface
             if (Analysis && typeof Analysis === 'function') {
-                J$.analysis = new Analysis();
+                JRR$.analysis = new Analysis();
             }
         });
     }
 
-    if (J$.analysis && J$.analysis.init) {
-        J$.analysis.init(initParam ? initParam : {});
+    if (JRR$.analysis && JRR$.analysis.init) {
+        JRR$.analysis.init(initParam ? initParam : {});
     }
 
     try {
 //    console.log("Starting replay ...")
-        J$.setTraceFileName(args.tracefile);
-        J$.replay();
+        JRR$.setTraceFileName(args.tracefile);
+        JRR$.replay();
     } finally {
-        var result = J$.endExecution();
+        var result = JRR$.endExecution();
         if (process.send && args.analysis) {
             // we assume send is synchronous
             process.send({result:result});

@@ -94,4 +94,4 @@
     }
 
     sandbox.analysis = new SimpleTaintEngine();
-}(J$));
+}(JRR$));

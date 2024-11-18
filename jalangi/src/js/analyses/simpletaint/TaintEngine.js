@@ -18,7 +18,7 @@
 
 (function (module) {
     function TaintEngine() {
-        var PREFIX1 = "J$";
+        var PREFIX1 = "JRR$";
         var SPECIAL_PROP = "*" + PREFIX1 + "*";
         var TRACE_FILE_NAME = "jalangi_trace";
         var TAINT_SUMMARY = "jalangi_taint";

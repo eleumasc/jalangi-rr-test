@@ -173,7 +173,7 @@
                 }
             }
             if (start === -1) {
-                throw new Error("J$.addAxiom('begin') not found");
+                throw new Error("JRR$.addAxiom('begin') not found");
             }
             if (start === len) {
                 return;
@@ -214,7 +214,7 @@
     };
 
     Frame.prototype.updateSolution = function() {
-        this.solution = combine(J$.inputs, this.solution);
+        this.solution = combine(JRR$.inputs, this.solution);
         var f = getFormulaFromBDD(this.pathConstraint);
         var concrete = f.substitute(this.solution);
         if (concrete === SymbolicBool.false) {
@@ -482,11 +482,11 @@
 
         var concrete = frame.makeConcrete(val, true);
         if (typeof concrete === 'boolean') {
-            J$.addAxiom(val);
+            JRR$.addAxiom(val);
         } else if (isSymbolicNumber(val)) {
-            J$.addAxiom(val.subtractLong(concrete).setop("=="));
+            JRR$.addAxiom(val.subtractLong(concrete).setop("=="));
         } else if (isSymbolicString(val)) {
-            J$.addAxiom(new SymbolicStringPredicate("==", val, concrete));
+            JRR$.addAxiom(new SymbolicStringPredicate("==", val, concrete));
         } else {
             throw new Error("Unknown symbolic type "+val+ " with path constraint "+ getPC());
         }

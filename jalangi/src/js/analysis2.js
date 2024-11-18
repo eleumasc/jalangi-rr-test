@@ -18,9 +18,9 @@
 
 
 // wrap in anonymous function to create local namespace when in browser
-// create / reset J$ global variable to hold analysis runtime
-if (typeof J$ === 'undefined') {
-    J$ = {};
+// create / reset JRR$ global variable to hold analysis runtime
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 (function (sandbox) {
@@ -605,5 +605,5 @@ if (typeof J$ === 'undefined') {
     // TODO why is this exposed here? --MS
     sandbox.callFunction = callFun;
     sandbox.EVAL_ORG = EVAL_ORG;
-})(J$);
+})(JRR$);
 

@@ -13,3 +13,5 @@ jalangi_trace*
 .DS_Store
 .idea
 jout/production/jalangijava/*.class
+
+out.txt

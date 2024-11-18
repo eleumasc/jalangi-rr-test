@@ -19,7 +19,7 @@
 
 /*jslint node: true */
 /*global process */
-/*global J$ */
+/*global JRR$ */
 
 var argparse = require('argparse');
 var DEFAULT_TRACE_FILE_NAME = 'jalangi_trace';
@@ -63,7 +63,7 @@ if (args.analysis) {
     });
 }
 
-J$.setTraceFileName(args.tracefile);
+JRR$.setTraceFileName(args.tracefile);
 
 
 // hack process.argv for the child script

@@ -24,7 +24,7 @@
         var fs = require('fs');
         var input, pathConstraint;
         var FileLineReader = require('./../../utils/FileLineReader');
-        var PREFIX1 = "J$";
+        var PREFIX1 = "JRR$";
         var FORMULA_FILE_NAME = "jalangi_formula";
         var SOLUTION_FILE_NAME = "jalangi_solution";
         var INPUTS_FILE_NAME = "jalangi_inputs";
@@ -139,7 +139,7 @@
                         } else if (newType === "object") {
                             val = "{}";
                         } else if (newType === "function") {
-                            val = "function(){return J$.readInput();}";
+                            val = "function(){return JRR$.readInput();}";
                         } else if (newType === "null") {
                             val = "null";
                         } else {
@@ -169,7 +169,7 @@
                         if (typeof val === "object") {
                             val = "{}";
                         } else if (typeof val === "function") {
-                            val = "function(){return J$.readInput();}";
+                            val = "function(){return JRR$.readInput();}";
                         }
                     }
                     writeASingleInput(fs,fd, key, val, oldInput.symbolic.fieldsOrdered, stype, newInputs);
@@ -303,9 +303,9 @@
 
         this.generateInputs = function(pathConstraint_) {
             var i;
-            input = J$.inputs;
+            input = JRR$.inputs;
             pathConstraint = pathConstraint_;
-            var solutionPoint = J$.getSolutionPoint();
+            var solutionPoint = JRR$.getSolutionPoint();
 
         for(i = pathConstraint.length - 1; i>=0; i--) {
             console.log(i+": "+pathConstraint[i][0]+":"+pathConstraint[i][1]);

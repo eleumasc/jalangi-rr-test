@@ -16,16 +16,16 @@
 
 // Author: Koushik Sen
 
-/*global J$ */
+/*global JRR$ */
 
-if (typeof J$ === 'undefined') {
-    J$ = {};
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 
 (function(sandbox){
 
-    var PREFIX1 = "J$";
+    var PREFIX1 = "JRR$";
     var SPECIAL_PROP2 = "*"+PREFIX1+"I*";
 
     var inputs = {};
@@ -117,4 +117,4 @@ if (typeof J$ === 'undefined') {
     if (sandbox.addAxiom === undefined) {
         sandbox.addAxiom = function() {};
     }
-}(J$));
+}(JRR$));

@@ -19,7 +19,7 @@
 
 /*jslint node: true */
 /*global process */
-/*global J$ */
+/*global JRR$ */
 
 var argparse = require('argparse');
 var parser = new argparse.ArgumentParser({
@@ -59,8 +59,8 @@ function runAnalysis(initParam) {
         });
     }
 
-    if (J$.analysis && J$.analysis.init) {
-        J$.analysis.init(initParam ? initParam : {});
+    if (JRR$.analysis && JRR$.analysis.init) {
+        JRR$.analysis.init(initParam ? initParam : {});
     }
 
     // hack process.argv for the child script
@@ -71,7 +71,7 @@ function runAnalysis(initParam) {
     try {
         require(script);
     } finally {
-        var result = J$.endExecution();
+        var result = JRR$.endExecution();
         if (process.send && args.analysis) {
             // we assume send is synchronous
             process.send({result:result});

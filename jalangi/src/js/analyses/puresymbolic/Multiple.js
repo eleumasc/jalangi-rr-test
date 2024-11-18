@@ -24,7 +24,7 @@ module.exports = function (sandbox) {
     var SymbolicBool = require('./../concolic/SymbolicBool');
     var SymbolicAnyVar = require('./SymbolicAnyVar');
     var getIIDInfo = require('./../../utils/IIDInfo');
-    var PREFIX1 = "J$";
+    var PREFIX1 = "JRR$";
     var SPECIAL_PROP2 = "*" + PREFIX1 + "I*";
     var EVAL_ORG = eval;
 
@@ -194,8 +194,8 @@ module.exports = function (sandbox) {
         if (!flag) {
             return String.fromCharCode.apply(this, arguments);
         }
-        var newSym = J$.readInput("", true);
-        J$.addAxiom(new FromCharCodePredicate(ints, newSym));
+        var newSym = JRR$.readInput("", true);
+        JRR$.addAxiom(new FromCharCodePredicate(ints, newSym));
         return newSym;
     }
 
@@ -203,9 +203,9 @@ module.exports = function (sandbox) {
         // this is a regexp object
         var newSym;
 
-        newSym = J$.readInput("", true);
-        J$.addAxiom(J$.B(0, "==", newSym, str));
-        return J$.B(0, "regexin", newSym, this);
+        newSym = JRR$.readInput("", true);
+        JRR$.addAxiom(JRR$.B(0, "==", newSym, str));
+        return JRR$.B(0, "regexin", newSym, this);
     }
 
     function getSingle(f) {
@@ -230,8 +230,8 @@ module.exports = function (sandbox) {
             return regexp_test;
         } else if (f === String.fromCharCode) {
             return create_concrete_invoke(string_fromCharCode, true, true);
-        } else if (f === J$.addAxiom ||
-            f === J$.readInput) {
+        } else if (f === JRR$.addAxiom ||
+            f === JRR$.readInput) {
             return f;
         } else if (f === Math.abs ||
             f === Math.acos ||
@@ -323,7 +323,7 @@ module.exports = function (sandbox) {
 
 
     function invokeEval(base, f, args) {
-        return f.call(base, J$.instrumentCode(args[0], {wrapProgram:false}).code);
+        return f.call(base, JRR$.instrumentCode(args[0], {wrapProgram:false}).code);
     }
 
 
@@ -563,7 +563,7 @@ module.exports = function (sandbox) {
 
                     if (!pred.isZero()) {
                         f2 = f.values[j].value;
-                        if (f2 === J$.addAxiom) {
+                        if (f2 === JRR$.addAxiom) {
                             value = singleInvokeFun(iid, base.values[i].value, f2, args, isConstructor);
                             ret = addValue(ret, pred, value);
                             newPC = newPC.or(pc.getPC());

@@ -139,4 +139,4 @@
     }
 
     sandbox.analysis = new ShadowProtoProperty();
-}(J$));
+}(JRR$));

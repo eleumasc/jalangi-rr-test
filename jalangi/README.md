@@ -126,7 +126,7 @@ say testme.js, insert the following 4 lines at the top of the file.
         require(process.cwd()+'/inputs');
     }
 
-In the code, use J$.readInput(arg) to indicate the inputs to the
+In the code, use JRR$.readInput(arg) to indicate the inputs to the
 program.  Then run the following command to perform concolic testing:
 
     python scripts/jalangi.py concolic -i 100000 testme
@@ -279,7 +279,7 @@ Then, open the HTML page in a browser (tested on Chrome) by running
 
 You can now play the game for sometime.  Try two moves and see the console output after pressing Shift-Alt-T.  In the
 in-browser mode, one must not use ConcolicValue to wrap a program value.  However, one could use shadow execution to collect statistics.
-Shadow memory is supported in the "inbrowser" mode.  Shadow memory library can be accessed in an analysis via J$.Globals.smemory.
+Shadow memory is supported in the "inbrowser" mode.  Shadow memory library can be accessed in an analysis via JRR$.Globals.smemory.
  smemory.getShadowObject(obj) returns the shadow object associated with obj if type of obj is "object" or "function".
  smemory.getFrame(varName) returns the frame that contains the variable named "varName".
 

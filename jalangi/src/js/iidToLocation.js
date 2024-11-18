@@ -16,8 +16,8 @@
 
 // Author: Koushik Sen
 
-if (typeof J$ === 'undefined') {
-    J$ = {};
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 (function (sandbox) {
@@ -46,4 +46,4 @@ if (typeof J$ === 'undefined') {
         return iid+"";
     };
 
-}(J$));
+}(JRR$));

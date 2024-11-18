@@ -19,7 +19,7 @@
 
 /*jslint node: true */
 /*global process */
-/*global J$ */
+/*global JRR$ */
 
 var argparse = require('argparse');
 var parser = new argparse.ArgumentParser({
@@ -49,7 +49,7 @@ function runAnalysis(initParam) {
         require('./../../../'+src);
     });
 
-    J$.initParams = initParam || {};
+    JRR$.initParams = initParam || {};
     if (args.analysis) {
         args.analysis.forEach(function (src) {
             require(path.resolve(src));
@@ -65,7 +65,7 @@ function runAnalysis(initParam) {
         try {
             require(script);
         } finally {
-            var result = J$.endExecution();
+            var result = JRR$.endExecution();
             if (process.send && args.analysis) {
                 // we assume send is synchronous
                 process.send({result:result});
@@ -75,8 +75,8 @@ function runAnalysis(initParam) {
         }
     }
 
-    if (J$.analysis && J$.analysis.onReady) {
-        J$.analysis.onReady(startProgram);
+    if (JRR$.analysis && JRR$.analysis.onReady) {
+        JRR$.analysis.onReady(startProgram);
     } else {
         startProgram();
     }

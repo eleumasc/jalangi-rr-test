@@ -17,7 +17,7 @@
 // Author: Manu Sridharan
 
 /*jslint node: true */
-/*global J$ */
+/*global JRR$ */
 
 var argparse = require('argparse');
 var parser = new argparse.ArgumentParser({

@@ -1,8 +1,8 @@
 //----------------------------------- Record Replay Engine ---------------------------------
 
-// create / reset J$ global variable to hold analysis runtime
-if (typeof J$ === 'undefined') {
-    J$ = {};
+// create / reset JRR$ global variable to hold analysis runtime
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 (function (sandbox) {
@@ -791,7 +791,7 @@ if (typeof J$ === 'undefined') {
 
 
     //----------------------------------- End Record Replay Engine ---------------------------------
-}(J$));
+}(JRR$));
 
 //----------------------------------- End Record Replay Engine ---------------------------------
 

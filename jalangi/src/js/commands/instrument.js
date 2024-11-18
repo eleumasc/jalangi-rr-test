@@ -203,9 +203,9 @@ function instrument(options, cb) {
                 });
             }
             if (analysis2) {
-                return "<script>J$.initParams = " + JSON.stringify(initParamsObj) + ";</script>";
+                return "<script>JRR$.initParams = " + JSON.stringify(initParamsObj) + ";</script>";
             } else {
-                return "<script>if (J$.analysis.init) { J$.analysis.init(" + JSON.stringify(initParamsObj) + "); }</script>";
+                return "<script>if (JRR$.analysis.init) { JRR$.analysis.init(" + JSON.stringify(initParamsObj) + "); }</script>";
             }
         }
 

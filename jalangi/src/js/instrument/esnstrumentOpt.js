@@ -25,7 +25,7 @@
     var FILESUFFIX1 = "_jalangi_";
     var COVERAGE_FILE_NAME = "jalangi_coverage";
     var SMAP_FILE_NAME = "jalangi_sourcemap.js";
-    var PREFIX1 = "J$";
+    var PREFIX1 = "JRR$";
     var RP = PREFIX1+"_";
 
 //    var N_LOG_LOAD = 0,
@@ -236,8 +236,8 @@
 
     var filename;
 
-// J$_i in expression context will replace it by an AST
-// {J$_i} will replace the body of the block statement with an array of statements passed as argument
+// JRR$_i in expression context will replace it by an AST
+// {JRR$_i} will replace the body of the block statement with an array of statements passed as argument
 
     function replaceInStatement(code) {
         var asts = arguments;
@@ -365,7 +365,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -394,7 +394,7 @@
                     "computed": false,
                     "object": {
                         "type": "Identifier",
-                        "name": "J$"
+                        "name": "JRR$"
                     },
                     "property": {
                         "type": "Identifier",
@@ -425,7 +425,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -455,7 +455,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -484,7 +484,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -510,7 +510,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -535,7 +535,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -583,7 +583,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -616,7 +616,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -634,7 +634,7 @@
                         "computed": false,
                         "object": {
                             "type": "Identifier",
-                            "name": "J$"
+                            "name": "JRR$"
                         },
                         "property": {
                             "type": "Identifier",
@@ -710,7 +710,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -740,7 +740,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -765,7 +765,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -789,7 +789,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -804,7 +804,7 @@
                         "computed": false,
                         "object": {
                             "type": "Identifier",
-                            "name": "J$"
+                            "name": "JRR$"
                         },
                         "property": {
                             "type": "Identifier",
@@ -835,7 +835,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -861,7 +861,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -890,7 +890,7 @@
                     "computed": false,
                     "object": {
                         "type": "Identifier",
-                        "name": "J$"
+                        "name": "JRR$"
                     },
                     "property": {
                         "type": "Identifier",
@@ -910,7 +910,7 @@
                     "computed": false,
                     "object": {
                         "type": "Identifier",
-                        "name": "J$"
+                        "name": "JRR$"
                     },
                     "property": {
                         "type": "Identifier",
@@ -935,7 +935,7 @@
                     "computed": false,
                     "object": {
                         "type": "Identifier",
-                        "name": "J$"
+                        "name": "JRR$"
                     },
                     "property": {
                         "type": "Identifier",
@@ -954,7 +954,7 @@
                     "computed": false,
                     "object": {
                         "type": "Identifier",
-                        "name": "J$"
+                        "name": "JRR$"
                     },
                     "property": {
                         "type": "Identifier",
@@ -978,7 +978,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -1003,7 +1003,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -1032,7 +1032,7 @@
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "J$"
+                    "name": "JRR$"
                 },
                 "property": {
                     "type": "Identifier",
@@ -1060,7 +1060,7 @@
                         "computed": false,
                         "object": {
                             "type": "Identifier",
-                            "name": "J$"
+                            "name": "JRR$"
                         },
                         "property": {
                             "type": "Identifier",
@@ -1091,7 +1091,7 @@
                         "computed": false,
                         "object": {
                             "type": "Identifier",
-                            "name": "J$"
+                            "name": "JRR$"
                         },
                         "property": {
                             "type": "Identifier",
@@ -1126,7 +1126,7 @@
                         "computed": false,
                         "object": {
                             "type": "Identifier",
-                            "name": "J$"
+                            "name": "JRR$"
                         },
                         "property": {
                             "type": "Identifier",
@@ -1170,7 +1170,7 @@
                         "computed": false,
                         "object": {
                             "type": "Identifier",
-                            "name": "J$"
+                            "name": "JRR$"
                         },
                         "property": {
                             "type": "Identifier",
@@ -1842,7 +1842,7 @@
         sandbox.instrumentCode = instrumentCode;
         sandbox.instrumentFile = instrumentFile;
     }
-}((typeof J$ === 'undefined')? undefined:J$));
+}((typeof JRR$ === 'undefined')? undefined:JRR$));
 
 
 

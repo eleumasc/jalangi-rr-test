@@ -16,8 +16,8 @@
 
 // Author: Koushik Sen
 
-if (typeof J$ === 'undefined') {
-    J$ = {};
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 (function(sandbox){
@@ -106,4 +106,4 @@ if (typeof J$ === 'undefined') {
     sandbox.setCurrentSolution = setCurrentSolution;
     sandbox.setCurrentSolutionIndex = setCurrentSolutionIndex;
     sandbox.addAxiom = sandbox.addAxiom?sandbox.addAxiom:function(c) {};
-}(J$));
+}(JRR$));

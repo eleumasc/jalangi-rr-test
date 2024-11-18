@@ -28,7 +28,7 @@
     /**
      * name of the global variable holding the Jalangi runtime objects
      */
-    var JALANGI_VAR = "J$";
+    var JALANGI_VAR = "JRR$";
 
     /**
      * information on surrounding AST context, to be used by visitors passed
@@ -53,7 +53,7 @@
 
     /**
      * invoked by transformAst() to see if a sub-ast should be ignored.  For now,
-     * only ignoring calls to J$.I()
+     * only ignoring calls to JRR$.I()
      */
     function ignoreSubAst(node) {
         return node.type === 'CallExpression' && node.callee.type === 'MemberExpression' &&
@@ -170,10 +170,10 @@
         function canMakeSymbolic(node) {
             if (node.callee.object) {
                 var callee = node.callee;
-                // we can replace calls to J$ functions with a SymbolicReference iff they have an IID as their first
+                // we can replace calls to JRR$ functions with a SymbolicReference iff they have an IID as their first
                 // argument.  'instrumentCode', 'getConcrete', and 'I' do not take an IID.
                 // TODO are we missing other cases?
-                if (callee.object.name === 'J$' && callee.property.name !== "instrumentCode" &&
+                if (callee.object.name === 'JRR$' && callee.property.name !== "instrumentCode" &&
                     callee.property.name !== "getConcrete" &&
                     callee.property.name !== "I" && node.arguments[0]) {
                     return true;
@@ -193,7 +193,7 @@
         var visitorPost = {
             'CallExpression':function (node) {
                 try {
-                    if (node.callee.object && node.callee.object.name === 'J$' && (node.callee.property.name === 'Se' || node.callee.property.name === 'Fe')) {
+                    if (node.callee.object && node.callee.object.name === 'JRR$' && (node.callee.property.name === 'Se' || node.callee.property.name === 'Fe')) {
                         // associate IID with the AST of the containing function / script
                         setSerializedAST(node.arguments[0].value, parentFunOrScript);
                         return node;

@@ -1,5 +1,5 @@
-if (typeof J$ === 'undefined') {
-    J$ = {};
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 (function (sandbox) {
@@ -173,4 +173,4 @@ if (typeof J$ === 'undefined') {
 
     };
 
-})(J$);
+})(JRR$);

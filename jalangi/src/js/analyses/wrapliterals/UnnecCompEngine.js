@@ -28,4 +28,4 @@
     }
 
     sandbox.analysis = new UnnecCompEngine();
-}(J$));
+}(JRR$));

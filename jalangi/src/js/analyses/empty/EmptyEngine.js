@@ -27,4 +27,4 @@
     }
 
     sandbox.analysis = new EmptyEngine();
-}(J$));
+}(JRR$));

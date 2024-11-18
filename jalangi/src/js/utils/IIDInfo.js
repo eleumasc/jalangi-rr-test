@@ -17,7 +17,7 @@
 // Author: Koushik Sen
 
 /*jslint node: true */
-/*global J$ */
+/*global JRR$ */
 module.exports = (function(){
     var isInit = false;
 
@@ -31,8 +31,8 @@ module.exports = (function(){
                 // don't crash if we can't find sourcemap file
             }
          }
-        if (J$.iids) {
-            if ((ret = J$.iids[iid])) {
+        if (JRR$.iids) {
+            if ((ret = JRR$.iids[iid])) {
 
                 return "("+ret[0]+":"+ret[1]+":"+ret[2]+")";
             }

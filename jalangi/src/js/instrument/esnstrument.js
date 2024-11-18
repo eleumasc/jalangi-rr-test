@@ -17,7 +17,7 @@
 // Author: Koushik Sen
 
 /*jslint node: true browser: true */
-/*global astUtil acorn escodegen J$ */
+/*global astUtil acorn escodegen JRR$ */
 
 //var StatCollector = require('../utils/StatCollector');
 
@@ -361,8 +361,8 @@ var acorn, escodegen, astUtil;
         printLineInfoAux(condCount, ast0);
     }
 
-// J$_i in expression context will replace it by an AST
-// {J$_i} will replace the body of the block statement with an array of statements passed as argument
+// JRR$_i in expression context will replace it by an AST
+// {JRR$_i} will replace the body of the block statement with an array of statements passed as argument
 
     function replaceInStatement(code) {
         var asts = arguments;
@@ -981,8 +981,8 @@ var acorn, escodegen, astUtil;
 //    }
 
     /**
-     * instruments entry of a script.  Adds the script entry (J$.Se) callback,
-     * and the J$.N init callbacks for locals.
+     * instruments entry of a script.  Adds the script entry (JRR$.Se) callback,
+     * and the JRR$.N init callbacks for locals.
      *
      */
     function instrumentScriptEntryExit(node, body0) {
@@ -1432,7 +1432,7 @@ var acorn, escodegen, astUtil;
 
         var currentScope = null;
 
-        // rename arguments to J$_arguments
+        // rename arguments to JRR$_arguments
         var fromName = 'arguments';
         var toName = astUtil.JALANGI_VAR + "_arguments";
 
@@ -1443,7 +1443,7 @@ var acorn, escodegen, astUtil;
             if (node.type === 'FunctionDeclaration') {
                 oldScope.addVar(node.id.name, "defun", node.loc);
                 MAP(node.params, function (param) {
-                    if (param.name === fromName) {         // rename arguments to J$_arguments
+                    if (param.name === fromName) {         // rename arguments to JRR$_arguments
                         param.name = toName;
                     }
                     currentScope.addVar(param.name, "arg");
@@ -1453,7 +1453,7 @@ var acorn, escodegen, astUtil;
                     currentScope.addVar(node.id.name, "lambda");
                 }
                 MAP(node.params, function (param) {
-                    if (param.name === fromName) {         // rename arguments to J$_arguments
+                    if (param.name === fromName) {         // rename arguments to JRR$_arguments
                         param.name = toName;
                     }
                     currentScope.addVar(param.name, "arg");
@@ -1490,19 +1490,19 @@ var acorn, escodegen, astUtil;
             'FunctionDeclaration':popScope,
             'FunctionExpression':popScope,
             'CatchClause':popScope,
-            'Identifier':function (node, context) {         // rename arguments to J$_arguments
+            'Identifier':function (node, context) {         // rename arguments to JRR$_arguments
                 if (context === astUtil.CONTEXT.RHS && node.name === fromName && currentScope.hasOwnVar(toName)) {
                     node.name = toName;
                 }
                 return node;
             },
-            "UpdateExpression":function (node) {         // rename arguments to J$_arguments
+            "UpdateExpression":function (node) {         // rename arguments to JRR$_arguments
                 if (node.argument.type === 'Identifier' && node.argument.name === fromName && currentScope.hasOwnVar(toName)) {
                     node.argument.name = toName;
                 }
                 return node;
             },
-            "AssignmentExpression":function (node) {         // rename arguments to J$_arguments
+            "AssignmentExpression":function (node) {         // rename arguments to JRR$_arguments
                 if (node.left.type === 'Identifier' && node.left.name === fromName && currentScope.hasOwnVar(toName)) {
                     node.left.name = toName;
                 }
@@ -1519,11 +1519,11 @@ var acorn, escodegen, astUtil;
         var key, child, startIndex = 0;
         if (ast.body) {
             var newBody = [];
-            if (ast.body.length > 0) { // do not hoister function declaration before J$.Fe or J$.Se
+            if (ast.body.length > 0) { // do not hoister function declaration before JRR$.Fe or JRR$.Se
                 if (ast.body[0].type === 'ExpressionStatement') {
                     if (ast.body[0].expression.type === 'CallExpression') {
                         if (ast.body[0].expression.callee.object &&
-                            ast.body[0].expression.callee.object.name === 'J$'
+                            ast.body[0].expression.callee.object.name === 'JRR$'
                             && ast.body[0].expression.callee.property
                             &&
                             (ast.body[0].expression.callee.property.name === 'Se' || ast.body[0].
@@ -1719,7 +1719,7 @@ var acorn, escodegen, astUtil;
     } else {
         sandbox.instrumentCode = instrumentCode;
     }
-}((typeof J$ === 'undefined') ? J$ = {} : J$));
+}((typeof JRR$ === 'undefined') ? JRR$ = {} : JRR$));
 
 
 

@@ -137,4 +137,4 @@
 
 //    sandbox.analysis = new UndefinedOffset();
     sandbox.analysis = new CheckNaN();
-}(J$));
+}(JRR$));

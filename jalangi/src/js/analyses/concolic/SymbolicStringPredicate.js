@@ -210,16 +210,16 @@
 
             s1 = (typeof this.left === 'string')?this.left.length:this.left.getField("length");
             s2 = (typeof this.right === 'string' || this.right instanceof RegExp)?this.right.length:this.right.getField("length");
-//        s1 = J$.G(0,this.left,"length", true);
-//        s2 = J$.G(0,this.right,"length", true);
+//        s1 = JRR$.G(0,this.left,"length", true);
+//        s2 = JRR$.G(0,this.right,"length", true);
 
             if (mode === "integer") {
                 switch(this.op) {
                     case SymbolicStringPredicate.EQ:
-                        formula = J$.B(0,"==",s1,s2);
+                        formula = JRR$.B(0,"==",s1,s2);
                         return formula.symbolic.getFormulaString(freeVars,mode, assignments);
                     case SymbolicStringPredicate.NE:
-                        //formula = J$.B(0,"!=",s1,s2);
+                        //formula = JRR$.B(0,"!=",s1,s2);
                         //return formula.symbolic.getFormulaString(freeVars,mode, assignments);
                         return "TRUE";
                     case SymbolicStringPredicate.IN:

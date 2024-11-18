@@ -1,5 +1,5 @@
-if (typeof J$ === 'undefined') {
-    J$ = {};
+if (typeof JRR$ === 'undefined') {
+    JRR$ = {};
 }
 
 (function (sandbox) {
@@ -27,4 +27,4 @@ if (typeof J$ === 'undefined') {
 //    Config.INSTR_UNARY = function(operator, ast) { return true; };
 //    Config.INSTR_LITERAL = function(literal, ast) { return true;}; // literal gets some dummy value if the type is object, function, or array
 //    Config.INSTR_CONDITIONAL = function(type, ast) { return true; }; // type could be "&&", "||", "switch", "other"
-}(J$));
+}(JRR$));
