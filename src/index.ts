@@ -1,11 +1,17 @@
 import jalangiExports from "jalangi/src/js/commands/jalangi_exports";
 import TraceReceiver from "./TraceReceiver";
 import { chromium } from "playwright";
-import { rewrite } from "./rewrite";
+import { FetchRouteHandler, LocalRouteHandler } from "./RouteHandler";
 import { rewriteExternalScript, rewriteHTML } from "rewriting-proxy";
+import path from "path";
 
 async function main(args: string[]) {
   const url = args[0];
+
+  const routeHandler =
+    typeof args[1] !== undefined
+      ? new LocalRouteHandler(path.resolve(args[1]), new FetchRouteHandler())
+      : new FetchRouteHandler();
 
   const outputDir = jalangiExports.initOutputDir();
   const headerCode = jalangiExports.getHeaderCode("jalangi");
@@ -33,9 +39,9 @@ async function main(args: string[]) {
         () => true,
         async (route, request) => {
           if (request.resourceType() === "document") {
-            rewrite(route, (buf) =>
+            await routeHandler.handle(route, (body) =>
               rewriteHTML(
-                buf,
+                body,
                 request.url(),
                 jalangiExports.rewriter,
                 undefined, // `<script>${headerCode}</script>`, // headerHTML
@@ -44,8 +50,12 @@ async function main(args: string[]) {
               )
             );
           } else if (request.resourceType() === "script") {
-            rewrite(route, (buf) =>
-              rewriteExternalScript(buf, request.url(), jalangiExports.rewriter)
+            await routeHandler.handle(route, (body) =>
+              rewriteExternalScript(
+                body,
+                request.url(),
+                jalangiExports.rewriter
+              )
             );
           } else {
             route.continue();

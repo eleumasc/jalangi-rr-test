@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello world</title>
+  </head>
+  <body>
+    <script>
+      document.cookie += "foo=hello";
+      fetch("/?" + document.cookie);
+    </script>
+  </body>
+</html>

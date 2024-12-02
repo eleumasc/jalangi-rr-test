@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello world</title>
+  </head>
+  <body>
+    <script>
+      function __AUGUR_SOURCE__(x) {
+        return x;
+      }
+      function __AUGUR_SINK__(x) {}
+
+      var pass = __AUGUR_SOURCE__("temp1234");
+
+      chkpassword(pass);
+
+      function chkpassword(pwd) {
+        if (5 > 6) {
+        } else {
+          __AUGUR_SINK__(pwd);
+        }
+      }
+    </script>
+  </body>
+</html>

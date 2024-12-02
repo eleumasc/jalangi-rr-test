@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello world</title>
+  </head>
+  <body>
+    <script>
+      function __AUGUR_SOURCE__(x) {
+        return x;
+      }
+      function __AUGUR_SINK__(x) {}
+
+      var pass = __AUGUR_SOURCE__("temp1234");
+
+      chkpassword(pass);
+
+      function chkpassword(pwd) {
+        function leak() {
+          var array = [];
+          for (var j = 0; j < 8; j++) {
+            array[j] = true;
+          }
+          for (var k = 0; k < 8; k++) {
+            (function (x) {
+              array[x] = function () {
+                return pwd[x] ? pwd[x] : -1;
+              };
+            })(k);
+          }
+          return array;
+        }
+        var array = leak();
+        for (var i = 0; i < array.length; i++) {
+          __AUGUR_SINK__(array[i]());
+        }
+      }
+    </script>
+  </body>
+</html>

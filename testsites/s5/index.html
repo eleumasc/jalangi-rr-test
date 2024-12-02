@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello world</title>
+  </head>
+  <body>
+    <script>
+      function solve(n) {
+        var count = 0;
+        while (n > 1) {
+          // console.log("n: " + n);
+          count += 1;
+          if (n % 2 === 0) {
+            n = n >> 1;
+          } else {
+            n = 3 * n + 1;
+          }
+        }
+        return count;
+      }
+
+      console.log("start");
+      console.log(solve(1000));
+      console.log("end");
+
+      document.cookie += "foo=hello";
+      fetch("/?" + document.cookie);
+    </script>
+  </body>
+</html>

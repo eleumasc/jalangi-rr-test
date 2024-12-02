@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello world</title>
+  </head>
+  <body>
+    <script>
+      function __AUGUR_SOURCE__(x) {
+        return x;
+      }
+      function __AUGUR_SINK__(x) {}
+
+      var pass = __AUGUR_SOURCE__("temp1234");
+
+      chkpassword(pass);
+
+      function chkpassword(pwd) {
+        var o = {
+          valueOf: function () {
+            return pass;
+          },
+        };
+        var r = o + "";
+        __AUGUR_SINK__(r);
+      }
+    </script>
+  </body>
+</html>

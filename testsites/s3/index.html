@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello world</title>
+  </head>
+  <body>
+    <script>
+      console.log("before");
+      var foo = document.cookie;
+    </script>
+    <script>
+      console.log("after");
+      fetch("/?" + foo);
+    </script>
+  </body>
+</html>

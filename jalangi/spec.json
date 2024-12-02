@@ -1,16 +1,16 @@
 {
-    "main": "augur-entry.js",
-    "sources": [
-        {
-            "type": "functionReturn",
-            "name": "__AUGUR_SOURCE__"
-        }
-    ],
-    "sinks": [
-        {
-            "type": "functionInvocation",
-            "name": "__AUGUR_SINK__"
-        }
-    ],
-    "tracking": "SourcedBoolean"
+  "main": "augur-entry.js",
+  "sources": [
+    {
+      "type": "functionReturn",
+      "name": "__AUGUR_SOURCE__"
+    }
+  ],
+  "sinks": [
+    {
+      "type": "functionInvocation",
+      "name": "__AUGUR_SINK__"
+    }
+  ],
+  "tracking": "SourcedBoolean"
 }

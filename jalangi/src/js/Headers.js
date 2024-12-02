@@ -7,6 +7,6 @@ module.exports.headerSources = [
     "src/js/SMemory.js",
     "src/js/iidToLocation.js",
     "src/js/RecordReplayEngine.js",
-    "src/js/analysis.js",
+    "src/js/lw-replay-analysis.js",
     "src/js/instrument/esnstrument.js"
 ];

@@ -14,4 +14,4 @@ jalangi_trace*
 .idea
 jout/production/jalangijava/*.class
 
-out.txt
+jalangi-rr-test_out.js
