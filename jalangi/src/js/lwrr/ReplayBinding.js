@@ -1,8 +1,7 @@
-if (typeof JRR$ === "undefined") {
-  JRR$ = {};
-}
+var Constants = require("./Constants");
+var Globals = require("./Globals");
 
-window = {
+global.window = {
   String: String,
   Array: Array,
   Error: Error,
@@ -12,17 +11,12 @@ window = {
   RegExp: RegExp,
 };
 
-(function (sandbox) {
-  var Constants = sandbox.Constants;
-  var Globals = sandbox.Globals;
-  var SMemory = sandbox.SMemory;
-  var RecordReplayEngine = sandbox.RecordReplayEngine;
-
+exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   var getConcrete = Constants.getConcrete;
   var HOP = Constants.HOP;
   var EVAL_ORIG = eval;
 
-  var SPECIAL_PROP = Constants.SPECIAL_PROP;
+  var SPECIAL_PROP1 = Constants.SPECIAL_PROP1;
   var SPECIAL_PROP2 = Constants.SPECIAL_PROP2;
   var SPECIAL_PROP3 = Constants.SPECIAL_PROP3;
 
@@ -30,14 +24,9 @@ window = {
     N_LOG_RETURN = Constants.N_LOG_RETURN,
     N_LOG_OPERATION = Constants.N_LOG_OPERATION;
 
-  Globals.mode = Constants.MODE_REPLAY;
-
   Globals.isInstrumentedCaller = false;
   Globals.isConstructorCall = false;
   Globals.isMethodCall = false;
-
-  var rrEngine = new RecordReplayEngine();
-  var smemory = new SMemory();
 
   //-------------------------------------- Symbolic functions -----------------------------------------------------------
 
@@ -80,9 +69,7 @@ window = {
       f === Number ||
       f === Date ||
       f === Boolean ||
-      f === RegExp ||
-      f === sandbox.addAxiom ||
-      f === sandbox.readInput
+      f === RegExp
     ) {
       return [f, true];
     } else if (
@@ -144,26 +131,19 @@ window = {
   }
 
   function invokeEval(base, f, args) {
-    if (rrEngine) {
-      rrEngine.RR_evalBegin();
-    }
-    if (smemory) {
-      smemory.evalBegin();
-    }
+    replayEngine.RR_evalBegin();
+    shadowMemory.evalBegin();
     try {
       return f(
         sandbox.instrumentCode(getConcrete(args[0]), {
+          // FIXME
           wrapProgram: false,
           isEval: true,
         }).code
       );
     } finally {
-      if (rrEngine) {
-        rrEngine.RR_evalEnd();
-      }
-      if (smemory) {
-        smemory.evalEnd();
-      }
+      replayEngine.RR_evalEnd();
+      shadowMemory.evalEnd();
     }
   }
 
@@ -205,9 +185,7 @@ window = {
           val = Reflect.apply(g, base, args);
         }
       } else {
-        if (rrEngine) {
-          rrEngine.RR_replay();
-        }
+        replayEngine.RR_replay();
         val = undefined;
       }
     } finally {
@@ -218,15 +196,13 @@ window = {
     }
 
     if (!ic && arr[1]) {
-      if (rrEngine) {
-        val = rrEngine.RR_L(iid, val, N_LOG_RETURN);
-      }
+      val = replayEngine.RR_L(iid, val, N_LOG_RETURN);
     }
-    if (sandbox.analysis && sandbox.analysis.invokeFun) {
-      tmp_rrEngine = rrEngine;
-      rrEngine = null;
+    if (analysis.invokeFun) {
+      tmp_rrEngine = replayEngine;
+      replayEngine = null;
       try {
-        val = sandbox.analysis.invokeFun(
+        val = analysis.invokeFun(
           iid,
           f,
           base,
@@ -237,17 +213,15 @@ window = {
       } catch (e) {
         clientAnalysisException(e);
       }
-      rrEngine = tmp_rrEngine;
-      if (rrEngine) {
-        rrEngine.RR_updateRecordedObject(val);
-      }
+      replayEngine = tmp_rrEngine;
+      replayEngine.RR_updateRecordedObject(val);
     }
     return val;
   }
 
   function G(iid, base, offset) {
     if (
-      offset === SPECIAL_PROP ||
+      offset === SPECIAL_PROP1 ||
       offset === SPECIAL_PROP2 ||
       offset === SPECIAL_PROP3
     ) {
@@ -258,31 +232,24 @@ window = {
 
     var val = baseConcrete[getConcrete(offset)];
 
-    if (rrEngine) {
-      val = rrEngine.RR_G(iid, baseConcrete, offset, val);
-    }
+    val = replayEngine.RR_G(iid, baseConcrete, offset, val);
     if (
-      sandbox.analysis &&
-      sandbox.analysis.getField &&
+      analysis.getField &&
       getConcrete(offset) !== "__proto__"
     ) {
-      var tmp_rrEngine = rrEngine;
-      rrEngine = null;
+      var tmp_rrEngine = replayEngine;
+      replayEngine = null;
       try {
-        val = sandbox.analysis.getField(iid, base, offset, val);
+        val = analysis.getField(iid, base, offset, val);
       } catch (e) {
         clientAnalysisException(e);
       }
-      rrEngine = tmp_rrEngine;
-      if (rrEngine) {
-        rrEngine.RR_updateRecordedObject(val);
-      }
+      replayEngine = tmp_rrEngine;
+      replayEngine.RR_updateRecordedObject(val);
     }
 
-    if (rrEngine) {
-      rrEngine.RR_replay();
-      rrEngine.RR_Load(iid);
-    }
+    replayEngine.RR_replay();
+    replayEngine.RR_Load(iid);
 
     return val;
   }
@@ -290,7 +257,7 @@ window = {
   // putField (property write)
   function P(iid, base, offset, val) {
     if (
-      offset === SPECIAL_PROP ||
+      offset === SPECIAL_PROP1 ||
       offset === SPECIAL_PROP2 ||
       offset === SPECIAL_PROP3
     ) {
@@ -314,21 +281,17 @@ window = {
       baseConcrete[getConcrete(offset)] = val;
     }
 
-    if (rrEngine) {
-      rrEngine.RR_P(iid, base, offset, val);
-    }
-    if (sandbox.analysis && sandbox.analysis.putField) {
+    replayEngine.RR_P(iid, base, offset, val);
+    if (analysis.putField) {
       try {
-        val = sandbox.analysis.putField(iid, base, offset, val);
+        val = analysis.putField(iid, base, offset, val);
       } catch (e) {
         clientAnalysisException(e);
       }
     }
 
-    if (rrEngine) {
-      rrEngine.RR_replay();
-      rrEngine.RR_Load(iid);
-    }
+    replayEngine.RR_replay();
+    replayEngine.RR_Load(iid);
 
     // the following patch is not elegant
     Globals.isInstrumentedCaller = tmpIsInstrumentedCaller;
@@ -353,12 +316,8 @@ window = {
   // Function enter
   function Fe(iid, val, thisArg, args) {
     argIndex = 0;
-    if (rrEngine) {
-      rrEngine.RR_Fe(iid, val, thisArg);
-    }
-    if (smemory) {
-      smemory.functionEnter(val);
-    }
+    replayEngine.RR_Fe(iid, val, thisArg);
+    shadowMemory.functionEnter(val);
     returnVal.push(undefined);
     exceptionVal = undefined;
   }
@@ -366,12 +325,8 @@ window = {
   // Function exit
   function Fr(iid) {
     var tmp;
-    if (rrEngine) {
-      rrEngine.RR_Fr(iid);
-    }
-    if (smemory) {
-      smemory.functionReturn();
-    }
+    replayEngine.RR_Fr(iid);
+    shadowMemory.functionReturn();
     // if there was an uncaught exception, throw it
     // here, to preserve exceptional control flow
     if (exceptionVal !== undefined) {
@@ -391,9 +346,9 @@ window = {
   function Rt(iid, val) {
     returnVal.pop();
     returnVal.push(val);
-    if (sandbox.analysis && sandbox.analysis.return_) {
+    if (analysis.return_) {
       try {
-        val = sandbox.analysis.return_(val);
+        val = analysis.return_(val);
       } catch (e) {
         clientAnalysisException(e);
       }
@@ -413,12 +368,8 @@ window = {
   // Script enter
   function Se(iid, val) {
     scriptCount += 1;
-    if (rrEngine) {
-      rrEngine.RR_Se(iid, val);
-    }
-    if (smemory) {
-      smemory.scriptEnter();
-    }
+    replayEngine.RR_Se(iid, val);
+    shadowMemory.scriptEnter();
   }
 
   // Script exit
@@ -427,12 +378,8 @@ window = {
 
     scriptCount -= 1;
 
-    if (rrEngine) {
-      rrEngine.RR_Sr(iid);
-    }
-    if (smemory) {
-      smemory.scriptReturn();
-    }
+    replayEngine.RR_Sr(iid);
+    shadowMemory.scriptReturn();
 
     if (exceptionVal !== undefined) {
       tmp = exceptionVal;
@@ -450,12 +397,8 @@ window = {
 
   // object/function/regexp/array Literal
   function T(iid, val, type, hasGetterSetter) {
-    if (rrEngine) {
-      rrEngine.RR_T(iid, val, type, hasGetterSetter);
-    }
-    if (smemory) {
-      smemory.defineFunction(val, type);
-    }
+    replayEngine.RR_T(iid, val, type, hasGetterSetter);
+    shadowMemory.defineFunction(val, type);
 
     if (type === N_LOG_FUNCTION_LIT) {
       if (
@@ -478,17 +421,15 @@ window = {
   // E.g., given code 'for (p in x) { ... }',
   // H is invoked with the value of x
   function H(iid, val) {
-    if (rrEngine) {
-      val = rrEngine.RR_H(iid, val);
-    }
+    val = replayEngine.RR_H(iid, val);
 
     return val;
   }
 
   // variable read
   function R(iid, name, val, isGlobal) {
-    if (rrEngine && (name === "this" || isGlobal)) {
-      val = rrEngine.RR_R(iid, name, val);
+    if (name === "this" || isGlobal) {
+      val = replayEngine.RR_R(iid, name, val);
     }
 
     return val;
@@ -496,8 +437,8 @@ window = {
 
   // variable write
   function W(iid, name, val, lhs, isGlobal) {
-    if (rrEngine && isGlobal) {
-      rrEngine.RR_W(iid, name, val);
+    if (isGlobal) {
+      replayEngine.RR_W(iid, name, val);
     }
     return val;
   }
@@ -507,11 +448,9 @@ window = {
     if (isArgumentSync) {
       argIndex += 1;
     }
-    if (rrEngine) {
-      val = rrEngine.RR_N(iid, name, val, isArgumentSync);
-    }
-    if (!isLocalSync && !isCatchParam && smemory) {
-      smemory.initialize(name);
+    val = replayEngine.RR_N(iid, name, val, isArgumentSync);
+    if (!isLocalSync && !isCatchParam) {
+      shadowMemory.initialize(name);
     }
     return val;
   }
@@ -607,21 +546,15 @@ window = {
         break;
       case "instanceof":
         resultConcrete = lhsConcrete instanceof rhsConcrete;
-        if (rrEngine) {
-          resultConcrete = rrEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
-        }
+        resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
         break;
       case "delete":
         resultConcrete = delete lhsConcrete[rhsConcrete];
-        if (rrEngine) {
-          resultConcrete = rrEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
-        }
+        resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
         break;
       case "in":
         resultConcrete = lhsConcrete in rhsConcrete;
-        if (rrEngine) {
-          resultConcrete = rrEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
-        }
+        resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
         break;
       case "&&":
         resultConcrete = lhsConcrete && rhsConcrete;
@@ -636,15 +569,13 @@ window = {
         throw new Error(op + " at " + iid + " not found");
     }
 
-    if (rrEngine) {
-      var isLhsOrRhsObject =
-        typeof lhsConcrete === "object" ||
-        typeof lhsConcrete === "function" ||
-        typeof rhsConcrete === "object" ||
-        typeof rhsConcrete === "function";
-      if (isArithmetic && isLhsOrRhsObject) {
-        resultConcrete = rrEngine.RR_L(iid, resultConcrete, N_LOG_OPERATION);
-      }
+    var isLhsOrRhsObject =
+      typeof lhsConcrete === "object" ||
+      typeof lhsConcrete === "function" ||
+      typeof rhsConcrete === "object" ||
+      typeof rhsConcrete === "function";
+    if (isArithmetic && isLhsOrRhsObject) {
+      resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_OPERATION);
     }
 
     return resultConcrete;
@@ -679,12 +610,10 @@ window = {
         throw new Error(op + " at " + iid + " not found");
     }
 
-    if (rrEngine) {
-      var isLhsObject =
-        typeof lhsConcrete === "object" || typeof lhsConcrete === "function";
-      if (isArithmetic && isLhsObject) {
-        resultConcrete = rrEngine.RR_L(iid, resultConcrete, N_LOG_OPERATION);
-      }
+    var isLhsObject =
+      typeof lhsConcrete === "object" || typeof lhsConcrete === "function";
+    if (isArithmetic && isLhsObject) {
+      resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_OPERATION);
     }
 
     return resultConcrete;
@@ -731,15 +660,13 @@ window = {
     return lhsConcrete;
   }
 
-  function endExecution() {}
-
   //----------------------------------- End Jalangi Library backend ---------------------------------
 
   // -------------------- Monkey patch some methods ------------------------
   var GET_OWN_PROPERTY_NAMES = Object.getOwnPropertyNames;
   Object.getOwnPropertyNames = function () {
     var val = GET_OWN_PROPERTY_NAMES.apply(Object, arguments);
-    var idx = val.indexOf(SPECIAL_PROP);
+    var idx = val.indexOf(SPECIAL_PROP1);
     if (idx > -1) {
       val.splice(idx, 1);
     }
@@ -754,44 +681,36 @@ window = {
     return val;
   };
 
-  sandbox.U = U; // Unary operation
-  sandbox.B = B; // Binary operation
-  sandbox.C = C; // Condition
-  sandbox.C1 = C1; // Switch key
-  sandbox.C2 = C2; // case label C1 === C2
-  sandbox.getConcrete = getConcrete; // Get concrete value
-  sandbox._ = last; // Last value passed to C
-
-  sandbox.H = H; // hash in for-in
-  sandbox.I = I; // Ignore argument
-  sandbox.G = G; // getField
-  sandbox.P = P; // putField
-  sandbox.R = R; // Read
-  sandbox.W = W; // Write
-  sandbox.N = N; // Init
-  sandbox.T = T; // object/function/regexp/array Literal
-  sandbox.F = F; // Function call
-  sandbox.M = M; // Method call
-  sandbox.A = A; // Modify and assign +=, -= ...
-  sandbox.Fe = Fe; // Function enter
-  sandbox.Fr = Fr; // Function return
-  sandbox.Se = Se; // Script enter
-  sandbox.Sr = Sr; // Script return
-  sandbox.Rt = Rt; // returned value
-  sandbox.Ra = Ra;
-  sandbox.Ex = Ex;
-
-  sandbox.replay = rrEngine.RR_replay;
-  sandbox.onflush = rrEngine.onflush;
-  sandbox.record = rrEngine.record;
-  sandbox.command = rrEngine.command;
-  sandbox.endExecution = endExecution;
-  sandbox.addRecord = rrEngine.addRecord;
-  sandbox.setTraceFileName = rrEngine.setTraceFileName;
-})(JRR$);
+  return {
+    U: U,
+    B: B,
+    C: C,
+    C1: C1,
+    C2: C2,
+    _: last,
+    H: H,
+    I: I,
+    G: G,
+    P: P,
+    R: R,
+    W: W,
+    N: N,
+    T: T,
+    F: F,
+    M: M,
+    A: A,
+    Fe: Fe,
+    Fr: Fr,
+    Se: Se,
+    Sr: Sr,
+    Rt: Rt,
+    Ra: Ra,
+    Ex: Ex,
+  };
+};
 
 //@todo:@assumption arguments.callee is available
-//@todo:@assumptions SPECIAL_PROP = "*JRR$*" is added to every object, but its enumeration is avoided in instrumented code
+//@todo:@assumptions SPECIAL_PROP1 = "*JRR$*" is added to every object, but its enumeration is avoided in instrumented code
 //@todo:@assumptions ReferenceError when accessing an undeclared uninitialized variable won't be thrown
 //@todo:@assumption window.x is not initialized in node.js replay mode when var x = e is done in the global scope, but handled using syncValues
 //@todo:@assumption eval is not renamed
