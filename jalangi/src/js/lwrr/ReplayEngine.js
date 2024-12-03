@@ -41,10 +41,9 @@ exports.ReplayEngine = function (traceReader) {
 
   var HOP = Constants.HOP;
   var hasGetterSetter = Constants.hasGetterSetter;
-  var getConcrete = Constants.getConcrete;
 
-  var currentFrame = { this: undefined };
-  var frameStack = [currentFrame];
+  var topFrame = { this: undefined };
+  var frameStack = [topFrame];
 
   var evalFrames = [];
 
@@ -77,7 +76,7 @@ exports.ReplayEngine = function (traceReader) {
   function setLiteralId(val, HasGetterSetter) {
     var id;
     var oldVal = val;
-    val = getConcrete(oldVal);
+    val = oldVal;
     if (!HOP(val, SPECIAL_PROP1) || !val[SPECIAL_PROP1]) {
       if (
         Object &&
@@ -123,7 +122,6 @@ exports.ReplayEngine = function (traceReader) {
     var oldReplayValue = replayValue,
       tmp;
 
-    replayValue = getConcrete(replayValue);
     var recordedValue = recordedArray[F_VALUE],
       recordedType = recordedArray[F_TYPE];
 
@@ -206,7 +204,7 @@ exports.ReplayEngine = function (traceReader) {
   }
 
   function getFrameContainingVar(name) {
-    var tmp = currentFrame;
+    var tmp = topFrame;
     while (tmp && !HOP(tmp, name)) {
       tmp = tmp[SPECIAL_PROP3];
     }
@@ -217,55 +215,19 @@ exports.ReplayEngine = function (traceReader) {
     }
   }
 
-  this.RR_getConcolicValue = function (obj) {
-    var val = getConcrete(obj);
-    if (
-      val === obj &&
-      val !== undefined &&
-      val !== null &&
-      HOP(val, SPECIAL_PROP1) &&
-      val[SPECIAL_PROP1]
-    ) {
-      var val = val[SPECIAL_PROP1][SPECIAL_PROP4];
-      if (val !== undefined) {
-        return val;
-      } else {
-        return obj;
-      }
-    } else {
-      return obj;
-    }
-  };
-
-  this.RR_updateRecordedObject = function (obj) {
-    var val = getConcrete(obj);
-    if (
-      val !== obj &&
-      val !== undefined &&
-      val !== null &&
-      HOP(val, SPECIAL_PROP1) &&
-      val[SPECIAL_PROP1]
-    ) {
-      var id = val[SPECIAL_PROP1][SPECIAL_PROP1];
-      if (traceReader.hasFutureReference(id)) objectMap[id] = obj;
-      val[SPECIAL_PROP1][SPECIAL_PROP4] = obj;
-    }
-  };
+  this.RR_updateRecordedObject = function (obj) {};
 
   this.RR_evalBegin = function () {
-    evalFrames.push(currentFrame);
-    currentFrame = frameStack[0];
+    evalFrames.push(topFrame);
+    topFrame = frameStack[0];
   };
 
   this.RR_evalEnd = function () {
-    currentFrame = evalFrames.pop();
+    topFrame = evalFrames.pop();
   };
 
   this.syncPrototypeChain = function (iid, obj) {
-    var proto;
-
-    obj = getConcrete(obj);
-    proto = obj.__proto__;
+    var proto = Object.getPrototypeOf(obj);
     var oid = this.RR_Load(
       iid,
       proto && HOP(proto, SPECIAL_PROP1) && proto[SPECIAL_PROP1]
@@ -274,26 +236,23 @@ exports.ReplayEngine = function (traceReader) {
       undefined
     );
     if (oid) {
-      obj.__proto__ = getConcrete(objectMap[oid]);
+      Object.setPrototypeOf(obj, objectMap[oid]);
     }
   };
 
   /**
    * getField
    */
-  this.RR_G = function (iid, base_c, offset, val) {
-    offset = getConcrete(offset);
-    mod_offset = offset === "__proto__" ? SPECIAL_PROP1 + offset : offset;
-    var rec;
-    if ((rec = traceReader.getCurrent()) === undefined) {
+  this.RR_G = function (iid, base, offset, val) {
+    var rec = traceReader.getCurrent();
+    if (rec === undefined) {
       traceReader.next();
       return val;
     } else {
       val = this.RR_L(iid, val, N_LOG_GETFIELD);
       // only add direct object properties
       if (rec[F_FUNNAME] === N_LOG_GETFIELD_OWN) {
-        // do not store ConcreteValue to __proto__
-        base_c[offset] = offset === "__proto__" ? getConcrete(val) : val;
+        base[offset] = val;
       }
       return val;
     }
@@ -310,9 +269,9 @@ exports.ReplayEngine = function (traceReader) {
       isArgumentSync === false ||
       (isArgumentSync === true && Globals.isInstrumentedCaller)
     ) {
-      return (currentFrame[name] = val);
+      return (topFrame[name] = val);
     } else if (isArgumentSync === true && !Globals.isInstrumentedCaller) {
-      currentFrame[name] = undefined;
+      topFrame[name] = undefined;
       return this.RR_R(iid, name, val, true);
     }
   };
@@ -321,7 +280,7 @@ exports.ReplayEngine = function (traceReader) {
     var ret, trackedVal, trackedFrame;
 
     if (useTopFrame || name === "this") {
-      trackedFrame = currentFrame;
+      trackedFrame = topFrame;
     } else {
       trackedFrame = getFrameContainingVar(name);
     }
@@ -359,8 +318,8 @@ exports.ReplayEngine = function (traceReader) {
 
   this.RR_Fe = function (iid, val, dis) {
     var ret;
-    frameStack.push((currentFrame = { this: undefined }));
-    currentFrame[SPECIAL_PROP3] = val[SPECIAL_PROP3];
+    frameStack.push((topFrame = { this: undefined }));
+    topFrame[SPECIAL_PROP3] = val[SPECIAL_PROP3];
     if (!Globals.isInstrumentedCaller) {
       ret = traceReader.getAndNext();
       checkPath(ret, iid);
@@ -373,20 +332,20 @@ exports.ReplayEngine = function (traceReader) {
 
   this.RR_Fr = function () {
     frameStack.pop();
-    currentFrame = frameStack[frameStack.length - 1];
+    topFrame = frameStack[frameStack.length - 1];
   };
 
   this.RR_Se = function (iid) {
     var ret;
-    frameStack.push((currentFrame = { this: undefined }));
-    currentFrame[SPECIAL_PROP3] = frameStack[0];
+    frameStack.push((topFrame = { this: undefined }));
+    topFrame[SPECIAL_PROP3] = frameStack[0];
     ret = traceReader.getAndNext();
     checkPath(ret, iid);
   };
 
   this.RR_Sr = function () {
     frameStack.pop();
-    currentFrame = frameStack[frameStack.length - 1];
+    topFrame = frameStack[frameStack.length - 1];
   };
 
   this.RR_H = function (iid, val) {
@@ -436,7 +395,7 @@ exports.ReplayEngine = function (traceReader) {
             writable: true,
           });
         }
-        val[SPECIAL_PROP3] = currentFrame;
+        val[SPECIAL_PROP3] = topFrame;
       }
     }
   };
@@ -454,15 +413,12 @@ exports.ReplayEngine = function (traceReader) {
         ret = traceReader.getCurrent();
       }
       if (ret[F_FUNNAME] === N_LOG_FUNCTION_ENTER) {
-        f = getConcrete(syncValue(ret, undefined, 0));
+        f = syncValue(ret, undefined, 0);
         ret = traceReader.getNext();
         var thisArg = syncValue(ret, undefined, 0);
         Reflect.call(f, thisArg, []);
       } else if (ret[F_FUNNAME] === N_LOG_SCRIPT_ENTER) {
-        var filePath = path.join(
-          traceDirname,
-          getConcrete(syncValue(ret, undefined, 0))
-        );
+        var filePath = path.join(traceDirname, syncValue(ret, undefined, 0));
         require(filePath);
       } else {
         return;

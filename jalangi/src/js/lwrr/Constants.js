@@ -67,14 +67,6 @@ Constants.N_LOG_OPERATION = 27;
 
 //-------------------------------------- Constant functions -----------------------------------------------------------
 
-Constants.getConcrete = function (val) {
-  return val;
-};
-
-Constants.getSymbolic = function (val) {
-  return val;
-};
-
 var HOP = (Constants.HOP = function (obj, prop) {
   return prop + "" === "__proto__" || CALL.call(HAS_OWN_PROPERTY, obj, prop); //Constants.HAS_OWN_PROPERTY_CALL.apply(Constants.HAS_OWN_PROPERTY, [obj, prop]);
 });

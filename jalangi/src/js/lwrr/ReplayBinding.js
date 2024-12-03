@@ -12,7 +12,6 @@ global.window = {
 };
 
 exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
-  var getConcrete = Constants.getConcrete;
   var HOP = Constants.HOP;
   var EVAL_ORIG = eval;
 
@@ -30,37 +29,6 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
 
   //-------------------------------------- Symbolic functions -----------------------------------------------------------
 
-  function modelFunction(f) {
-    return function () {
-      var len = arguments.length;
-      for (var i = 0; i < len; i += 1) {
-        arguments[i] = getConcrete(arguments[i]);
-      }
-      return f.apply(getConcrete(this), arguments);
-    };
-  }
-
-  function concretize(obj) {
-    for (var key in obj) {
-      if (HOP(obj, key)) {
-        obj[key] = getConcrete(obj[key]);
-      }
-    }
-  }
-
-  function modelDefineProperty(f) {
-    return function () {
-      var len = arguments.length;
-      for (var i = 0; i < len; i += 1) {
-        arguments[i] = getConcrete(arguments[i]);
-      }
-      if (len > 2) {
-        concretize(arguments[2]);
-      }
-      return f.apply(getConcrete(this), arguments);
-    };
-  }
-
   function getSymbolicFunctionToInvokeAndLog(f, isConstructor) {
     if (
       f === Array ||
@@ -74,8 +42,7 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       return [f, true];
     } else if (
       f === console.log ||
-      (typeof getConcrete(arguments[0]) === "string" &&
-        f === RegExp.prototype.test) || // fixes bug in minPathDev.js
+      (typeof arguments[0] === "string" && f === RegExp.prototype.test) ||
       f === String.prototype.indexOf ||
       f === String.prototype.lastIndexOf ||
       f === String.prototype.substring ||
@@ -103,9 +70,9 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       f === Math.tan ||
       f === parseInt
     ) {
-      return [modelFunction(f), false];
+      return [f, false];
     } else if (f === Object.defineProperty) {
-      return [modelDefineProperty(f), false];
+      return [f, false];
     }
     return [null, true];
   }
@@ -135,8 +102,8 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
     shadowMemory.evalBegin();
     try {
       return f(
-        sandbox.instrumentCode(getConcrete(args[0]), {
-          // FIXME
+        // TODO: remove sandbox
+        sandbox.instrumentCode(args[0], {
           wrapProgram: false,
           isEval: true,
         }).code
@@ -152,27 +119,22 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       invoke,
       val,
       ic,
-      tmp_rrEngine,
       tmpIsConstructorCall,
       tmpIsInstrumentedCaller,
       tmpIsMethodCall;
-
-    var fConcrete = getConcrete(f);
 
     tmpIsConstructorCall = Globals.isConstructorCall;
     Globals.isConstructorCall = isConstructor;
     tmpIsMethodCall = Globals.isMethodCall;
     Globals.isMethodCall = isMethod;
 
-    var arr = getSymbolicFunctionToInvokeAndLog(fConcrete, isConstructor);
+    var arr = getSymbolicFunctionToInvokeAndLog(f, isConstructor);
     tmpIsInstrumentedCaller = Globals.isInstrumentedCaller;
     ic = Globals.isInstrumentedCaller =
-      fConcrete === undefined ||
-      HOP(fConcrete, SPECIAL_PROP2) ||
-      typeof fConcrete !== "function";
+      f === undefined || HOP(f, SPECIAL_PROP2) || typeof f !== "function";
 
     invoke = arr[0] || Globals.isInstrumentedCaller;
-    g = arr[0] || fConcrete;
+    g = arr[0] || f;
 
     pushSwitchKey();
     try {
@@ -199,21 +161,11 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       val = replayEngine.RR_L(iid, val, N_LOG_RETURN);
     }
     if (analysis.invokeFun) {
-      tmp_rrEngine = replayEngine;
-      replayEngine = null;
       try {
-        val = analysis.invokeFun(
-          iid,
-          f,
-          base,
-          args,
-          val,
-          isConstructor
-        );
+        val = analysis.invokeFun(iid, f, base, args, val, isConstructor);
       } catch (e) {
         clientAnalysisException(e);
       }
-      replayEngine = tmp_rrEngine;
       replayEngine.RR_updateRecordedObject(val);
     }
     return val;
@@ -228,23 +180,15 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       return undefined;
     }
 
-    var baseConcrete = getConcrete(base);
+    var val = base[offset];
 
-    var val = baseConcrete[getConcrete(offset)];
-
-    val = replayEngine.RR_G(iid, baseConcrete, offset, val);
-    if (
-      analysis.getField &&
-      getConcrete(offset) !== "__proto__"
-    ) {
-      var tmp_rrEngine = replayEngine;
-      replayEngine = null;
+    val = replayEngine.RR_G(iid, base, offset, val);
+    if (analysis.getField && offset !== "__proto__") {
       try {
         val = analysis.getField(iid, base, offset, val);
       } catch (e) {
         clientAnalysisException(e);
       }
-      replayEngine = tmp_rrEngine;
       replayEngine.RR_updateRecordedObject(val);
     }
 
@@ -270,16 +214,7 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
     var tmpIsInstrumentedCaller = Globals.isInstrumentedCaller;
     Globals.isInstrumentedCaller = false;
 
-    var baseConcrete = getConcrete(base);
-
-    if (
-      typeof baseConcrete === "function" &&
-      getConcrete(offset) === "prototype"
-    ) {
-      baseConcrete[getConcrete(offset)] = getConcrete(val);
-    } else {
-      baseConcrete[getConcrete(offset)] = val;
-    }
+    base[offset] = val;
 
     replayEngine.RR_P(iid, base, offset, val);
     if (analysis.putField) {
@@ -466,157 +401,153 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
 
   // Binary operation
   function B(iid, op, lhs, rhs) {
-    var lhsConcrete = getConcrete(lhs);
-    var rhsConcrete = getConcrete(rhs);
-    var resultConcrete;
+    var ret;
     var isArithmetic = false;
 
     switch (op) {
       case "+":
         isArithmetic = true;
-        resultConcrete = lhsConcrete + rhsConcrete;
+        ret = lhs + rhs;
         break;
       case "-":
         isArithmetic = true;
-        resultConcrete = lhsConcrete - rhsConcrete;
+        ret = lhs - rhs;
         break;
       case "*":
         isArithmetic = true;
-        resultConcrete = lhsConcrete * rhsConcrete;
+        ret = lhs * rhs;
         break;
       case "/":
         isArithmetic = true;
-        resultConcrete = lhsConcrete / rhsConcrete;
+        ret = lhs / rhs;
         break;
       case "%":
         isArithmetic = true;
-        resultConcrete = lhsConcrete % rhsConcrete;
+        ret = lhs % rhs;
         break;
       case "<<":
         isArithmetic = true;
-        resultConcrete = lhsConcrete << rhsConcrete;
+        ret = lhs << rhs;
         break;
       case ">>":
         isArithmetic = true;
-        resultConcrete = lhsConcrete >> rhsConcrete;
+        ret = lhs >> rhs;
         break;
       case ">>>":
         isArithmetic = true;
-        resultConcrete = lhsConcrete >>> rhsConcrete;
+        ret = lhs >>> rhs;
         break;
       case "<":
         isArithmetic = true;
-        resultConcrete = lhsConcrete < rhsConcrete;
+        ret = lhs < rhs;
         break;
       case ">":
         isArithmetic = true;
-        resultConcrete = lhsConcrete > rhsConcrete;
+        ret = lhs > rhs;
         break;
       case "<=":
         isArithmetic = true;
-        resultConcrete = lhsConcrete <= rhsConcrete;
+        ret = lhs <= rhs;
         break;
       case ">=":
         isArithmetic = true;
-        resultConcrete = lhsConcrete >= rhsConcrete;
+        ret = lhs >= rhs;
         break;
       case "==":
-        resultConcrete = lhsConcrete == rhsConcrete;
+        ret = lhs == rhs;
         break;
       case "!=":
-        resultConcrete = lhsConcrete != rhsConcrete;
+        ret = lhs != rhs;
         break;
       case "===":
-        resultConcrete = lhsConcrete === rhsConcrete;
+        ret = lhs === rhs;
         break;
       case "!==":
-        resultConcrete = lhsConcrete !== rhsConcrete;
+        ret = lhs !== rhs;
         break;
       case "&":
         isArithmetic = true;
-        resultConcrete = lhsConcrete & rhsConcrete;
+        ret = lhs & rhs;
         break;
       case "|":
         isArithmetic = true;
-        resultConcrete = lhsConcrete | rhsConcrete;
+        ret = lhs | rhs;
         break;
       case "^":
         isArithmetic = true;
-        resultConcrete = lhsConcrete ^ rhsConcrete;
+        ret = lhs ^ rhs;
         break;
       case "instanceof":
-        resultConcrete = lhsConcrete instanceof rhsConcrete;
-        resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
+        ret = lhs instanceof rhs;
+        ret = replayEngine.RR_L(iid, ret, N_LOG_RETURN);
         break;
       case "delete":
-        resultConcrete = delete lhsConcrete[rhsConcrete];
-        resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
+        ret = delete lhs[rhs];
+        ret = replayEngine.RR_L(iid, ret, N_LOG_RETURN);
         break;
       case "in":
-        resultConcrete = lhsConcrete in rhsConcrete;
-        resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_RETURN);
+        ret = lhs in rhs;
+        ret = replayEngine.RR_L(iid, ret, N_LOG_RETURN);
         break;
       case "&&":
-        resultConcrete = lhsConcrete && rhsConcrete;
+        ret = lhs && rhs;
         break;
       case "||":
-        resultConcrete = lhsConcrete || rhsConcrete;
+        ret = lhs || rhs;
         break;
       case "regexin":
-        resultConcrete = rhsConcrete.test(lhsConcrete);
+        ret = rhs.test(lhs);
         break;
       default:
         throw new Error(op + " at " + iid + " not found");
     }
 
     var isLhsOrRhsObject =
-      typeof lhsConcrete === "object" ||
-      typeof lhsConcrete === "function" ||
-      typeof rhsConcrete === "object" ||
-      typeof rhsConcrete === "function";
+      typeof lhs === "object" ||
+      typeof lhs === "function" ||
+      typeof rhs === "object" ||
+      typeof rhs === "function";
     if (isArithmetic && isLhsOrRhsObject) {
-      resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_OPERATION);
+      ret = replayEngine.RR_L(iid, ret, N_LOG_OPERATION);
     }
 
-    return resultConcrete;
+    return ret;
   }
 
   // Unary operation
   function U(iid, op, lhs) {
-    var lhsConcrete = getConcrete(lhs);
-    var resultConcrete;
+    var ret;
     var isArithmetic = false;
 
     switch (op) {
       case "+":
         isArithmetic = true;
-        resultConcrete = +lhsConcrete;
+        ret = +lhs;
         break;
       case "-":
         isArithmetic = true;
-        resultConcrete = -lhsConcrete;
+        ret = -lhs;
         break;
       case "~":
         isArithmetic = true;
-        resultConcrete = ~lhsConcrete;
+        ret = ~lhs;
         break;
       case "!":
-        resultConcrete = !lhsConcrete;
+        ret = !lhs;
         break;
       case "typeof":
-        resultConcrete = typeof lhsConcrete;
+        ret = typeof lhs;
         break;
       default:
         throw new Error(op + " at " + iid + " not found");
     }
 
-    var isLhsObject =
-      typeof lhsConcrete === "object" || typeof lhsConcrete === "function";
+    var isLhsObject = typeof lhs === "object" || typeof lhs === "function";
     if (isArithmetic && isLhsObject) {
-      resultConcrete = replayEngine.RR_L(iid, resultConcrete, N_LOG_OPERATION);
+      ret = replayEngine.RR_L(iid, ret, N_LOG_OPERATION);
     }
 
-    return resultConcrete;
+    return ret;
   }
 
   function pushSwitchKey() {
@@ -635,29 +566,23 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   // E.g., for 'switch (x) { ... }',
   // C1 is invoked with value of x
   function C1(iid, lhs) {
-    var lhsConcrete = getConcrete(lhs);
-
     switchKey = lhs;
 
-    return lhsConcrete;
+    return lhs;
   }
 
   // case label inside switch
   function C2(iid, lhs) {
-    var lhsConcrete = getConcrete(lhs);
-
     B(iid, "===", switchKey, lhs);
 
-    return lhsConcrete;
+    return lhs;
   }
 
   // Expression in conditional
   function C(iid, lhs) {
-    var lhsConcrete = getConcrete(lhs);
+    lastVal = lhs;
 
-    lastVal = lhsConcrete;
-
-    return lhsConcrete;
+    return lhs;
   }
 
   //----------------------------------- End Jalangi Library backend ---------------------------------
