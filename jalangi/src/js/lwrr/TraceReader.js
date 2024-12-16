@@ -15,19 +15,19 @@ var T_ARRAY = Constants.T_ARRAY;
 var decodeNaNandInfForJSON = Constants.decodeNaNandInfForJSON;
 
 class TraceReader {
-  constructor(traceArray, objectAgeMap) {
+  constructor(traceArray, objectMaxAgeMap) {
     this.traceArray = traceArray;
-    this.objectAgeMap = objectAgeMap;
+    this.objectMaxAgeMap = objectMaxAgeMap;
     this.traceIndex = 0;
     this.sequence = 0;
   }
 
   hasFutureReference(id) {
-    return this.objectAgeMap[id] >= this.sequence;
+    return this.objectMaxAgeMap[id] >= this.sequence;
   }
 
   canDeleteReference(record) {
-    return this.objectAgeMap[record[F_VALUE]] === record[F_SEQ];
+    return this.objectMaxAgeMap[record[F_VALUE]] === record[F_SEQ];
   }
 
   next() {
@@ -57,7 +57,7 @@ class TraceReader {
 
   static fromFile(filename) {
     const traceArray = [];
-    const objectAgeMap = [];
+    const objectMaxAgeMap = [];
 
     const lineReader = new LineByLine(filename);
     let line;
@@ -71,17 +71,17 @@ class TraceReader {
         record[F_FUNNAME] !== N_LOG_HASH &&
         record[F_VALUE] !== Constants.UNKNOWN
       ) {
-        objectAgeMap[record[F_VALUE]] = record[F_SEQ];
+        objectMaxAgeMap[record[F_VALUE]] = record[F_SEQ];
       }
       if (
         record[F_FUNNAME] === N_LOG_LOAD &&
         record[F_VALUE] !== Constants.UNKNOWN
       ) {
-        objectAgeMap[record[F_VALUE]] = record[F_SEQ];
+        objectMaxAgeMap[record[F_VALUE]] = record[F_SEQ];
       }
     }
 
-    return new TraceReader(traceArray, objectAgeMap);
+    return new TraceReader(traceArray, objectMaxAgeMap);
   }
 }
 
