@@ -7,12 +7,6 @@ Constants.SPECIAL_PROP2 = Symbol();
 Constants.SPECIAL_PROP3 = Symbol();
 Constants.SPECIAL_PROP4 = Symbol();
 
-Constants.MODE_RECORD = 1;
-Constants.MODE_REPLAY = 2;
-Constants.MODE_NO_RR_IGNORE_UNINSTRUMENTED = 3;
-Constants.MODE_NO_RR = 4;
-Constants.MODE_DIRECT = 5;
-
 Constants.T_NULL = 0;
 Constants.T_NUMBER = 1;
 Constants.T_BOOLEAN = 2;

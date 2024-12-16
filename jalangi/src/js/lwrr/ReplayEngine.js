@@ -1,11 +1,12 @@
 var path = require("path");
 var Constants = require("./Constants");
 var Globals = require("./Globals");
+var TraceReader = require("./TraceReader");
 
-exports.ReplayEngine = function (traceReader) {
-  var traceDirname = path.dirname(traceReader.getTraceFilename());
+exports.ReplayEngine = function (traceFilename) {
+  var traceReader = TraceReader.fromFile(traceFilename);
 
-  traceReader.populateObjectIdLife();
+  var traceDirname = path.dirname(traceFilename);
 
   var SPECIAL_PROP_INIT_DESCRIPTOR = Constants.SPECIAL_PROP_INIT_DESCRIPTOR;
   var DefineProperty = Constants.DefineProperty;
@@ -180,8 +181,8 @@ exports.ReplayEngine = function (traceReader) {
             ret +
             "] iid = " +
             iid +
-            " index = " +
-            traceReader.getPreviousIndex()
+            " seq = " +
+            (traceReader.getSequence() - 1)
         );
       }
     }
@@ -300,10 +301,10 @@ exports.ReplayEngine = function (traceReader) {
     frameStack.push((topFrame = { this: undefined }));
     topFrame[SPECIAL_PROP3] = val[SPECIAL_PROP3];
     if (!Globals.isInstrumentedCaller) {
-      ret = traceReader.getAndNext();
+      ret = traceReader.next();
       checkPath(ret, iid);
       syncValue(ret, val, iid);
-      ret = traceReader.getAndNext();
+      ret = traceReader.next();
       checkPath(ret, iid);
       syncValue(ret, dis, iid);
     }
@@ -318,7 +319,7 @@ exports.ReplayEngine = function (traceReader) {
     var ret;
     frameStack.push((topFrame = { this: undefined }));
     topFrame[SPECIAL_PROP3] = frameStack[0];
-    ret = traceReader.getAndNext();
+    ret = traceReader.next();
     checkPath(ret, iid);
   };
 
@@ -329,7 +330,7 @@ exports.ReplayEngine = function (traceReader) {
 
   this.RR_H = function (iid, val) {
     var ret;
-    ret = traceReader.getAndNext();
+    ret = traceReader.next();
     checkPath(ret, iid);
     val = ret[F_VALUE];
     ret = Object.create(null);
@@ -384,12 +385,12 @@ exports.ReplayEngine = function (traceReader) {
       }
       if (ret[F_FUNNAME] === N_LOG_FUNCTION_ENTER) {
         f = syncValue(ret, undefined, 0);
-        ret = traceReader.getNext();
+        ret = traceReader.next();
         var thisArg = syncValue(ret, undefined, 0);
         Reflect.call(f, thisArg, []);
       } else if (ret[F_FUNNAME] === N_LOG_SCRIPT_ENTER) {
-        var filePath = path.join(traceDirname, syncValue(ret, undefined, 0));
-        require(filePath);
+        var filename = path.join(traceDirname, syncValue(ret, undefined, 0));
+        require(filename);
       } else {
         return;
       }
