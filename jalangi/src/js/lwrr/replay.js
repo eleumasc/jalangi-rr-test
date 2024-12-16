@@ -1,8 +1,7 @@
 var path = require("path");
-var { setJalangiBinding } = require("./Jalangi");
+var { setBinding } = require("./Jalangi");
 var { createReplayBinding } = require("./ReplayBinding");
 var { ReplayEngine } = require("./ReplayEngine");
-var { ShadowMemory } = require("./ShadowMemory");
 var { TraceReader } = require("./TraceReader");
 
 function replay(args) {
@@ -15,9 +14,7 @@ function replay(args) {
   }
 
   var replayEngine = new ReplayEngine(new TraceReader(args.tracefile));
-  setJalangiBinding(
-    createReplayBinding(analysis, replayEngine, new ShadowMemory())
-  );
+  setBinding(createReplayBinding(analysis, replayEngine));
 
   replayEngine.RR_replay();
 

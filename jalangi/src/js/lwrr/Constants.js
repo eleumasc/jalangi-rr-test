@@ -2,22 +2,10 @@ var Constants = {};
 
 module.exports = Constants;
 
-var APPLY = (Constants.APPLY = Function.prototype.apply);
-var CALL = (Constants.CALL = Function.prototype.call);
-APPLY.apply = APPLY;
-APPLY.call = CALL;
-CALL.apply = APPLY;
-CALL.call = CALL;
-
-var HAS_OWN_PROPERTY = (Constants.HAS_OWN_PROPERTY =
-  Object.prototype.hasOwnProperty);
-Constants.HAS_OWN_PROPERTY_CALL = Object.prototype.hasOwnProperty.call;
-
-var PREFIX1 = "JRR$";
-Constants.SPECIAL_PROP1 = "*" + PREFIX1 + "*";
-Constants.SPECIAL_PROP2 = "*" + PREFIX1 + "I*";
-Constants.SPECIAL_PROP3 = "*" + PREFIX1 + "C*";
-Constants.SPECIAL_PROP4 = "*" + PREFIX1 + "W*";
+Constants.SPECIAL_PROP1 = Symbol();
+Constants.SPECIAL_PROP2 = Symbol();
+Constants.SPECIAL_PROP3 = Symbol();
+Constants.SPECIAL_PROP4 = Symbol();
 
 Constants.MODE_RECORD = 1;
 Constants.MODE_REPLAY = 2;
@@ -59,7 +47,6 @@ Constants.N_LOG_NUMBER_LIT = 22;
 Constants.N_LOG_BOOLEAN_LIT = 23;
 Constants.N_LOG_UNDEFINED_LIT = 24;
 Constants.N_LOG_NULL_LIT = 25;
-// property read *directly* from an object (not from the prototype chain)
 Constants.N_LOG_GETFIELD_OWN = 26;
 Constants.N_LOG_OPERATION = 27;
 
@@ -67,9 +54,17 @@ Constants.N_LOG_OPERATION = 27;
 
 //-------------------------------------- Constant functions -----------------------------------------------------------
 
-var HOP = (Constants.HOP = function (obj, prop) {
-  return prop + "" === "__proto__" || CALL.call(HAS_OWN_PROPERTY, obj, prop); //Constants.HAS_OWN_PROPERTY_CALL.apply(Constants.HAS_OWN_PROPERTY, [obj, prop]);
-});
+Constants.DefineProperty = Object.defineProperty;
+var HasOwnProperty = (Constants.HasOwnProperty = Function.prototype.call.bind(
+  Object.prototype.hasOwnProperty
+));
+
+Constants.SPECIAL_PROP_INIT_DESCRIPTOR = {
+  configurable: false,
+  enumerable: false,
+  value: undefined,
+  writable: true,
+};
 
 Constants.hasGetterSetter = function (obj, prop, isGetter) {
   if (typeof Object.getOwnPropertyDescriptor !== "function") {
@@ -87,7 +82,7 @@ Constants.hasGetterSetter = function (obj, prop, isGetter) {
       if (!isGetter && typeof desc.set === "function") {
         return true;
       }
-    } else if (HOP(obj, prop)) {
+    } else if (HasOwnProperty(obj, prop)) {
       return false;
     }
     obj = obj.__proto__;

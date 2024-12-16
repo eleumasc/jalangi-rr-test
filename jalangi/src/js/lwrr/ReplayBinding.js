@@ -11,13 +11,14 @@ global.window = {
   RegExp: RegExp,
 };
 
-exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
-  var HOP = Constants.HOP;
+exports.createReplayBinding = function (analysis, replayEngine) {
   var EVAL_ORIG = eval;
 
-  var SPECIAL_PROP1 = Constants.SPECIAL_PROP1;
+  var SPECIAL_PROP_INIT_DESCRIPTOR = Constants.SPECIAL_PROP_INIT_DESCRIPTOR;
+  var DefineProperty = Constants.DefineProperty;
+  var HasOwnProperty = Constants.HasOwnProperty;
+
   var SPECIAL_PROP2 = Constants.SPECIAL_PROP2;
-  var SPECIAL_PROP3 = Constants.SPECIAL_PROP3;
 
   var N_LOG_FUNCTION_LIT = Constants.N_LOG_FUNCTION_LIT,
     N_LOG_RETURN = Constants.N_LOG_RETURN,
@@ -85,7 +86,7 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   // call_in_finally.js)
   var returnVal = [];
   var exceptionVal;
-  var scriptCount = 0;
+  var scriptsCount = 0;
   var lastVal;
   var switchKey;
   var switchKeyStack = [];
@@ -99,7 +100,7 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
 
   function invokeEval(base, f, args) {
     replayEngine.RR_evalBegin();
-    shadowMemory.evalBegin();
+    // shadowMemory.evalBegin();
     try {
       return f(
         // TODO: remove sandbox
@@ -110,15 +111,13 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       );
     } finally {
       replayEngine.RR_evalEnd();
-      shadowMemory.evalEnd();
+      // shadowMemory.evalEnd();
     }
   }
 
   function invokeFun(iid, base, f, args, isConstructor, isMethod) {
-    var g,
-      invoke,
-      val,
-      ic,
+    var val,
+      isInstrumentedCaller,
       tmpIsConstructorCall,
       tmpIsInstrumentedCaller,
       tmpIsMethodCall;
@@ -130,21 +129,18 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
 
     var arr = getSymbolicFunctionToInvokeAndLog(f, isConstructor);
     tmpIsInstrumentedCaller = Globals.isInstrumentedCaller;
-    ic = Globals.isInstrumentedCaller =
-      f === undefined || HOP(f, SPECIAL_PROP2) || typeof f !== "function";
-
-    invoke = arr[0] || Globals.isInstrumentedCaller;
-    g = arr[0] || f;
+    isInstrumentedCaller = Globals.isInstrumentedCaller =
+      typeof f !== "function" || HasOwnProperty(f, SPECIAL_PROP2);
 
     pushSwitchKey();
     try {
-      if (g === EVAL_ORIG) {
-        val = invokeEval(base, g, args);
-      } else if (invoke) {
+      if (f === EVAL_ORIG) {
+        val = invokeEval(base, f, args);
+      } else if (isInstrumentedCaller) {
         if (isConstructor) {
-          val = Reflect.construct(g, args);
+          val = Reflect.construct(f, args);
         } else {
-          val = Reflect.apply(g, base, args);
+          val = Reflect.apply(f, base, args);
         }
       } else {
         replayEngine.RR_replay();
@@ -157,7 +153,7 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       Globals.isMethodCall = tmpIsMethodCall;
     }
 
-    if (!ic && arr[1]) {
+    if (!isInstrumentedCaller && arr[1]) {
       val = replayEngine.RR_L(iid, val, N_LOG_RETURN);
     }
     if (analysis.invokeFun) {
@@ -166,20 +162,11 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       } catch (e) {
         clientAnalysisException(e);
       }
-      replayEngine.RR_updateRecordedObject(val);
     }
     return val;
   }
 
   function G(iid, base, offset) {
-    if (
-      offset === SPECIAL_PROP1 ||
-      offset === SPECIAL_PROP2 ||
-      offset === SPECIAL_PROP3
-    ) {
-      return undefined;
-    }
-
     var val = base[offset];
 
     val = replayEngine.RR_G(iid, base, offset, val);
@@ -189,7 +176,6 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
       } catch (e) {
         clientAnalysisException(e);
       }
-      replayEngine.RR_updateRecordedObject(val);
     }
 
     replayEngine.RR_replay();
@@ -200,14 +186,6 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
 
   // putField (property write)
   function P(iid, base, offset, val) {
-    if (
-      offset === SPECIAL_PROP1 ||
-      offset === SPECIAL_PROP2 ||
-      offset === SPECIAL_PROP3
-    ) {
-      return undefined;
-    }
-
     // window.location.hash = hash calls a function out of nowhere.
     // fix needs a call to RR_replay and setting isInstrumentedCaller to false
     // the following patch is not elegant
@@ -252,7 +230,7 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   function Fe(iid, val, thisArg, args) {
     argIndex = 0;
     replayEngine.RR_Fe(iid, val, thisArg);
-    shadowMemory.functionEnter(val);
+    // shadowMemory.functionEnter(val);
     returnVal.push(undefined);
     exceptionVal = undefined;
   }
@@ -261,7 +239,7 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   function Fr(iid) {
     var tmp;
     replayEngine.RR_Fr(iid);
-    shadowMemory.functionReturn();
+    // shadowMemory.functionReturn();
     // if there was an uncaught exception, throw it
     // here, to preserve exceptional control flow
     if (exceptionVal !== undefined) {
@@ -302,24 +280,24 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
 
   // Script enter
   function Se(iid, val) {
-    scriptCount += 1;
+    ++scriptsCount;
     replayEngine.RR_Se(iid, val);
-    shadowMemory.scriptEnter();
+    // shadowMemory.scriptEnter();
   }
 
   // Script exit
   function Sr(iid) {
     var tmp;
 
-    scriptCount -= 1;
+    --scriptsCount;
 
     replayEngine.RR_Sr(iid);
-    shadowMemory.scriptReturn();
+    // shadowMemory.scriptReturn();
 
     if (exceptionVal !== undefined) {
       tmp = exceptionVal;
       exceptionVal = undefined;
-      if (scriptCount > 0) {
+      if (scriptsCount > 0) {
         throw tmp;
       }
     }
@@ -333,19 +311,10 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   // object/function/regexp/array Literal
   function T(iid, val, type, hasGetterSetter) {
     replayEngine.RR_T(iid, val, type, hasGetterSetter);
-    shadowMemory.defineFunction(val, type);
+    // shadowMemory.defineFunction(val, type);
 
     if (type === N_LOG_FUNCTION_LIT) {
-      if (
-        Object &&
-        Object.defineProperty &&
-        typeof Object.defineProperty === "function"
-      ) {
-        Object.defineProperty(val, SPECIAL_PROP2, {
-          enumerable: false,
-          writable: true,
-        });
-      }
+      DefineProperty(val, SPECIAL_PROP2, SPECIAL_PROP_INIT_DESCRIPTOR);
       val[SPECIAL_PROP2] = true;
     }
 
@@ -381,11 +350,11 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   // variable declaration (Init)
   function N(iid, name, val, isArgumentSync, isLocalSync, isCatchParam) {
     if (isArgumentSync) {
-      argIndex += 1;
+      ++argIndex;
     }
     val = replayEngine.RR_N(iid, name, val, isArgumentSync);
     if (!isLocalSync && !isCatchParam) {
-      shadowMemory.initialize(name);
+      // shadowMemory.initialize(name);
     }
     return val;
   }
@@ -490,10 +459,10 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
         ret = replayEngine.RR_L(iid, ret, N_LOG_RETURN);
         break;
       case "&&":
-        ret = lhs && rhs;
+        ret = lhs && rhs; // FIXME
         break;
       case "||":
-        ret = lhs || rhs;
+        ret = lhs || rhs; // FIXME
         break;
       case "regexin":
         ret = rhs.test(lhs);
@@ -502,12 +471,13 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
         throw new Error(op + " at " + iid + " not found");
     }
 
-    var isLhsOrRhsObject =
-      typeof lhs === "object" ||
-      typeof lhs === "function" ||
-      typeof rhs === "object" ||
-      typeof rhs === "function";
-    if (isArithmetic && isLhsOrRhsObject) {
+    if (
+      isArithmetic &&
+      ((typeof lhs === "object" && lhs) ||
+        typeof lhs === "function" ||
+        (typeof rhs === "object" && rhs) ||
+        typeof rhs === "function")
+    ) {
       ret = replayEngine.RR_L(iid, ret, N_LOG_OPERATION);
     }
 
@@ -536,14 +506,16 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
         ret = !lhs;
         break;
       case "typeof":
-        ret = typeof lhs;
+        ret = typeof lhs; // FIXME
         break;
       default:
         throw new Error(op + " at " + iid + " not found");
     }
 
-    var isLhsObject = typeof lhs === "object" || typeof lhs === "function";
-    if (isArithmetic && isLhsObject) {
+    if (
+      isArithmetic &&
+      ((typeof lhs === "object" && lhs) || typeof lhs === "function")
+    ) {
       ret = replayEngine.RR_L(iid, ret, N_LOG_OPERATION);
     }
 
@@ -586,25 +558,6 @@ exports.createReplayBinding = function (analysis, replayEngine, shadowMemory) {
   }
 
   //----------------------------------- End Jalangi Library backend ---------------------------------
-
-  // -------------------- Monkey patch some methods ------------------------
-  var GET_OWN_PROPERTY_NAMES = Object.getOwnPropertyNames;
-  Object.getOwnPropertyNames = function () {
-    var val = GET_OWN_PROPERTY_NAMES.apply(Object, arguments);
-    var idx = val.indexOf(SPECIAL_PROP1);
-    if (idx > -1) {
-      val.splice(idx, 1);
-    }
-    idx = val.indexOf(SPECIAL_PROP2);
-    if (idx > -1) {
-      val.splice(idx, 1);
-    }
-    idx = val.indexOf(SPECIAL_PROP3);
-    if (idx > -1) {
-      val.splice(idx, 1);
-    }
-    return val;
-  };
 
   return {
     U: U,

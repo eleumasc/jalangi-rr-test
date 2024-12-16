@@ -1,155 +1,113 @@
-var Constants = require("./Constants");
+var {
+  N_LOG_FUNCTION_LIT,
+  DefineProperty,
+  HasOwnProperty,
+  SPECIAL_PROP_INIT_DESCRIPTOR,
+} = require("./Constants");
 
 exports.ShadowMemory = function () {
-  var SPECIAL_PROP1 = Constants.SPECIAL_PROP1 + "M";
-  var SPECIAL_PROP3 = Constants.SPECIAL_PROP3 + "M";
-  var N_LOG_FUNCTION_LIT = Constants.N_LOG_FUNCTION_LIT;
-  var objectId = 1;
-  var scriptCount = 0;
-  var HOP = Constants.HOP;
+  var PROP_SHADOW = Symbol();
+  var PROP_PARENT = Symbol();
 
-  var frame = Object.create(null);
-
-  var frameStack = [frame];
-  var evalFrames = [];
-
-  function createShadowObject(val) {
-    var type = typeof val;
-    if (
-      (type === "object" || type === "function") &&
-      val !== null &&
-      !HOP(val, SPECIAL_PROP1)
-    ) {
-      if (
-        Object &&
-        Object.defineProperty &&
-        typeof Object.defineProperty === "function"
-      ) {
-        Object.defineProperty(val, SPECIAL_PROP1, {
-          enumerable: false,
-          writable: true,
-        });
-      }
-      try {
-        val[SPECIAL_PROP1] = Object.create(null);
-        val[SPECIAL_PROP1][SPECIAL_PROP1] = objectId;
-        objectId = objectId + 2;
-      } catch (e) {
-        // cannot attach special field in some DOM Objects.  So ignore them.
-      }
-    }
-  }
+  var freshObjId = 1;
+  var scriptsCount = 0;
+  var topFrame = { __proto__: null };
+  var frameStack = [topFrame];
+  var evalFrameStack = [];
 
   this.getShadowObject = function (val) {
-    var value;
-    createShadowObject(val);
-    var type = typeof val;
-    if (
-      (type === "object" || type === "function") &&
-      val !== null &&
-      HOP(val, SPECIAL_PROP1)
-    ) {
-      value = val[SPECIAL_PROP1];
-    } else {
-      value = undefined;
+    var shadow;
+    if ((typeof val === "object" && val) || typeof val === "function") {
+      if (HasOwnProperty(val, PROP_SHADOW)) {
+        return val[PROP_SHADOW];
+      } else {
+        DefineProperty(val, PROP_SHADOW, SPECIAL_PROP_INIT_DESCRIPTOR); // FIXME: throws an error in case of frozen objects and some DOM objects
+        shadow = val[PROP_SHADOW] = { __proto__: null };
+        shadow[PROP_SHADOW] = freshObjId;
+        freshObjId += 2;
+        return shadow;
+      }
     }
-    return value;
   };
 
   this.getFrame = function (name) {
-    var tmp = frame;
-    while (tmp && !HOP(tmp, name)) {
-      tmp = tmp[SPECIAL_PROP3];
+    var frame = topFrame;
+    while (frame && !HasOwnProperty(frame, name)) {
+      frame = frame[PROP_PARENT];
     }
-    if (tmp) {
-      return tmp;
+    if (frame) {
+      return frame;
     } else {
-      return frameStack[0]; // return global scope
+      return frameStack[0];
     }
   };
 
-  this.getParentFrame = function (otherFrame) {
-    if (otherFrame) {
-      return otherFrame[SPECIAL_PROP3];
+  this.getParentFrame = function (frame) {
+    if (frame) {
+      return frame[PROP_PARENT];
     } else {
       return null;
     }
   };
 
   this.getCurrentFrame = function () {
-    return frame;
+    return topFrame;
   };
 
   this.getClosureFrame = function (fun) {
-    return fun[SPECIAL_PROP3];
+    return fun[PROP_PARENT];
   };
 
   this.getShadowObjectID = function (obj) {
-    return obj[SPECIAL_PROP1];
+    return obj[PROP_SHADOW];
   };
 
   this.defineFunction = function (val, type) {
     if (type === N_LOG_FUNCTION_LIT) {
-      if (
-        Object &&
-        Object.defineProperty &&
-        typeof Object.defineProperty === "function"
-      ) {
-        Object.defineProperty(val, SPECIAL_PROP3, {
-          enumerable: false,
-          writable: true,
-        });
-      }
-      val[SPECIAL_PROP3] = frame;
+      DefineProperty(val, PROP_PARENT, SPECIAL_PROP_INIT_DESCRIPTOR);
+      val[PROP_PARENT] = topFrame;
     }
   };
 
   this.evalBegin = function () {
-    evalFrames.push(frame);
-    frame = frameStack[0];
+    evalFrameStack.push(topFrame);
+    topFrame = frameStack[0];
   };
 
   this.evalEnd = function () {
-    frame = evalFrames.pop();
+    topFrame = evalFrameStack.pop();
   };
 
   this.initialize = function (name) {
-    frame[name] = undefined;
+    topFrame[name] = undefined;
   };
 
   this.functionEnter = function (val) {
-    frameStack.push((frame = Object.create(null)));
-    if (
-      Object &&
-      Object.defineProperty &&
-      typeof Object.defineProperty === "function"
-    ) {
-      Object.defineProperty(frame, SPECIAL_PROP3, {
-        enumerable: false,
-        writable: true,
-      });
-    }
-    frame[SPECIAL_PROP3] = val[SPECIAL_PROP3];
+    topFrame = { __proto__: null };
+    frameStack.push(topFrame);
+    DefineProperty(val, PROP_PARENT, SPECIAL_PROP_INIT_DESCRIPTOR);
+    topFrame[PROP_PARENT] = val[PROP_PARENT];
   };
 
   this.functionReturn = function () {
     frameStack.pop();
-    frame = frameStack[frameStack.length - 1];
+    topFrame = frameStack[frameStack.length - 1];
   };
 
   this.scriptEnter = function () {
-    scriptCount++;
-    if (scriptCount > 1) {
-      frameStack.push((frame = Object.create(null)));
-      frame[SPECIAL_PROP3] = frameStack[0];
+    ++scriptsCount;
+    if (scriptsCount > 1) {
+      topFrame = { __proto__: null };
+      frameStack.push(topFrame);
+      topFrame[PROP_PARENT] = frameStack[0];
     }
   };
 
   this.scriptReturn = function () {
-    if (scriptCount > 1) {
+    if (scriptsCount > 1) {
       frameStack.pop();
-      frame = frameStack[frameStack.length - 1];
+      topFrame = frameStack[frameStack.length - 1];
     }
-    scriptCount--;
+    --scriptsCount;
   };
 };

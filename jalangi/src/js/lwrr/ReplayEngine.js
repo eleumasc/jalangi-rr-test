@@ -7,6 +7,9 @@ exports.ReplayEngine = function (traceReader) {
 
   traceReader.populateObjectIdLife();
 
+  var SPECIAL_PROP_INIT_DESCRIPTOR = Constants.SPECIAL_PROP_INIT_DESCRIPTOR;
+  var DefineProperty = Constants.DefineProperty;
+
   var SPECIAL_PROP1 = Constants.SPECIAL_PROP1;
   var SPECIAL_PROP2 = Constants.SPECIAL_PROP2;
   var SPECIAL_PROP3 = Constants.SPECIAL_PROP3;
@@ -39,15 +42,13 @@ exports.ReplayEngine = function (traceReader) {
     N_LOG_SPECIAL = Constants.N_LOG_SPECIAL,
     N_LOG_GETFIELD_OWN = Constants.N_LOG_GETFIELD_OWN;
 
-  var HOP = Constants.HOP;
+  var HasOwnProperty = Constants.HasOwnProperty;
   var hasGetterSetter = Constants.hasGetterSetter;
 
+  var freshLitId = 2;
   var topFrame = { this: undefined };
   var frameStack = [topFrame];
-
-  var evalFrames = [];
-
-  var literalId = 2;
+  var evalFrameStack = [];
 
   var objectMap = [];
   var createdMockObject = false;
@@ -77,27 +78,18 @@ exports.ReplayEngine = function (traceReader) {
     var id;
     var oldVal = val;
     val = oldVal;
-    if (!HOP(val, SPECIAL_PROP1) || !val[SPECIAL_PROP1]) {
-      if (
-        Object &&
-        Object.defineProperty &&
-        typeof Object.defineProperty === "function"
-      ) {
-        Object.defineProperty(val, SPECIAL_PROP1, {
-          enumerable: false,
-          writable: true,
-        });
-      }
+    if (!HasOwnProperty(val, SPECIAL_PROP1) || !val[SPECIAL_PROP1]) {
+      DefineProperty(val, SPECIAL_PROP1, SPECIAL_PROP_INIT_DESCRIPTOR);
       if (Array.isArray(val)) val[SPECIAL_PROP1] = [];
       else val[SPECIAL_PROP1] = {};
-      val[SPECIAL_PROP1][SPECIAL_PROP1] = id = literalId;
-      literalId = literalId + 2;
+      val[SPECIAL_PROP1][SPECIAL_PROP1] = id = freshLitId;
+      freshLitId += 2;
       // changes due to getter or setter method
       for (var offset in val) {
         if (
           offset !== SPECIAL_PROP1 &&
           offset !== SPECIAL_PROP2 &&
-          HOP(val, offset)
+          HasOwnProperty(val, offset)
         ) {
           if (!HasGetterSetter || !hasGetterSetter(val, offset, true))
             val[SPECIAL_PROP1][offset] = val[offset];
@@ -144,7 +136,10 @@ exports.ReplayEngine = function (traceReader) {
       if (obj === undefined) {
         if (
           type === recordedType &&
-          !(HOP(replayValue, SPECIAL_PROP1) && replayValue[SPECIAL_PROP1])
+          !(
+            HasOwnProperty(replayValue, SPECIAL_PROP1) &&
+            replayValue[SPECIAL_PROP1]
+          )
         ) {
           obj = replayValue;
         } else {
@@ -156,18 +151,7 @@ exports.ReplayEngine = function (traceReader) {
             obj = function () {};
           }
         }
-        try {
-          if (
-            Object &&
-            Object.defineProperty &&
-            typeof Object.defineProperty === "function"
-          ) {
-            Object.defineProperty(obj, SPECIAL_PROP1, {
-              enumerable: false,
-              writable: true,
-            });
-          }
-        } catch (ex) {}
+        DefineProperty(obj, SPECIAL_PROP1, SPECIAL_PROP_INIT_DESCRIPTOR); // FIXME: throws an error in case of frozen objects and some DOM objects
         obj[SPECIAL_PROP1] = {};
         obj[SPECIAL_PROP1][SPECIAL_PROP1] = recordedValue;
         createdMockObject = true;
@@ -205,7 +189,7 @@ exports.ReplayEngine = function (traceReader) {
 
   function getFrameContainingVar(name) {
     var tmp = topFrame;
-    while (tmp && !HOP(tmp, name)) {
+    while (tmp && !HasOwnProperty(tmp, name)) {
       tmp = tmp[SPECIAL_PROP3];
     }
     if (tmp) {
@@ -215,22 +199,20 @@ exports.ReplayEngine = function (traceReader) {
     }
   }
 
-  this.RR_updateRecordedObject = function (obj) {};
-
   this.RR_evalBegin = function () {
-    evalFrames.push(topFrame);
+    evalFrameStack.push(topFrame);
     topFrame = frameStack[0];
   };
 
   this.RR_evalEnd = function () {
-    topFrame = evalFrames.pop();
+    topFrame = evalFrameStack.pop();
   };
 
   this.syncPrototypeChain = function (iid, obj) {
     var proto = Object.getPrototypeOf(obj);
     var oid = this.RR_Load(
       iid,
-      proto && HOP(proto, SPECIAL_PROP1) && proto[SPECIAL_PROP1]
+      proto && HasOwnProperty(proto, SPECIAL_PROP1) && proto[SPECIAL_PROP1]
         ? proto[SPECIAL_PROP1][SPECIAL_PROP1]
         : undefined,
       undefined
@@ -265,12 +247,9 @@ exports.ReplayEngine = function (traceReader) {
   };
 
   this.RR_N = function (iid, name, val, isArgumentSync) {
-    if (
-      isArgumentSync === false ||
-      (isArgumentSync === true && Globals.isInstrumentedCaller)
-    ) {
+    if (!isArgumentSync || Globals.isInstrumentedCaller) {
       return (topFrame[name] = val);
-    } else if (isArgumentSync === true && !Globals.isInstrumentedCaller) {
+    } else {
       topFrame[name] = undefined;
       return this.RR_R(iid, name, val, true);
     }
@@ -355,7 +334,7 @@ exports.ReplayEngine = function (traceReader) {
     val = ret[F_VALUE];
     ret = Object.create(null);
     for (i in val) {
-      if (HOP(val, i)) {
+      if (HasOwnProperty(val, i)) {
         ret[i] = 1;
       }
     }
@@ -385,16 +364,7 @@ exports.ReplayEngine = function (traceReader) {
     ) {
       setLiteralId(val, hasGetterSetter);
       if (fun === N_LOG_FUNCTION_LIT) {
-        if (
-          Object &&
-          Object.defineProperty &&
-          typeof Object.defineProperty === "function"
-        ) {
-          Object.defineProperty(val, SPECIAL_PROP3, {
-            enumerable: false,
-            writable: true,
-          });
-        }
+        DefineProperty(val, SPECIAL_PROP3, SPECIAL_PROP_INIT_DESCRIPTOR);
         val[SPECIAL_PROP3] = topFrame;
       }
     }
