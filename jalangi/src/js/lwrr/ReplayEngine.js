@@ -387,7 +387,7 @@ exports.ReplayEngine = function (traceFilename) {
         f = syncValue(ret, undefined, 0);
         ret = traceReader.next();
         var thisArg = syncValue(ret, undefined, 0);
-        Reflect.call(f, thisArg, []);
+        Reflect.apply(f, thisArg, []);
       } else if (ret[F_FUNNAME] === N_LOG_SCRIPT_ENTER) {
         var filename = path.join(traceDirname, syncValue(ret, undefined, 0));
         require(filename);
