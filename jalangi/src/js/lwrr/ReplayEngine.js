@@ -4,9 +4,9 @@ var Globals = require("./Globals");
 var TraceReader = require("./TraceReader");
 
 exports.ReplayEngine = function (traceFilename) {
-  var traceReader = TraceReader.fromFile(traceFilename);
-
   var traceDirname = path.dirname(traceFilename);
+
+  var traceReader = TraceReader.fromFile(traceFilename);
 
   var SPECIAL_PROP_INIT_DESCRIPTOR = Constants.SPECIAL_PROP_INIT_DESCRIPTOR;
   var DefineProperty = Constants.DefineProperty;
@@ -380,12 +380,11 @@ exports.ReplayEngine = function (traceFilename) {
       var f, prefix;
       if (ret[F_FUNNAME] === N_LOG_SPECIAL) {
         prefix = ret[F_VALUE];
-        traceReader.next();
-        ret = traceReader.getCurrent();
+        ret = traceReader.next();
       }
       if (ret[F_FUNNAME] === N_LOG_FUNCTION_ENTER) {
         f = syncValue(ret, undefined, 0);
-        ret = traceReader.next();
+        ret = traceReader.next(); // FIXME: it was getNext (not getAndNext)
         var thisArg = syncValue(ret, undefined, 0);
         Reflect.apply(f, thisArg, []);
       } else if (ret[F_FUNNAME] === N_LOG_SCRIPT_ENTER) {

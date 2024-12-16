@@ -32,13 +32,14 @@ class TraceReader {
 
   next() {
     const record = this.traceArray[this.traceIndex];
-    if (record && record[F_SEQ] === this.sequence) {
-      ++this.traceIndex;
-    } else {
-      record = undefined;
-    }
+    const currentSequence = this.sequence;
     ++this.sequence;
-    return record;
+    if (record && record[F_SEQ] === currentSequence) {
+      ++this.traceIndex;
+      return record;
+    } else {
+      return undefined;
+    }
   }
 
   getCurrent() {
