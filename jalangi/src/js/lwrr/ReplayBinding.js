@@ -344,6 +344,7 @@ exports.createReplayBinding = function (analysis, replayEngine) {
     if (isGlobal) {
       replayEngine.RR_W(iid, name, val);
     }
+
     return val;
   }
 
@@ -368,158 +369,159 @@ exports.createReplayBinding = function (analysis, replayEngine) {
     };
   }
 
+  const isObjectType = {
+    object: true,
+    function: true,
+    boolean: false,
+    number: false,
+    string: false,
+    undefined: false,
+    symbol: false,
+    bigint: false,
+  };
+
+  function arithmeticBop(bopFun) {
+    return function (iid, lhs, rhs) {
+      if (
+        (isObjectType[typeof lhs] && lhs) ||
+        (isObjectType[typeof rhs] && rhs)
+      ) {
+        return replayEngine.RR_L(iid, bopFun(lhs, rhs), N_LOG_OPERATION);
+      } else {
+        return bopFun(lhs, rhs);
+      }
+    };
+  }
+
+  function logicBop(bopFun) {
+    return function (_, lhs, rhs) {
+      return bopFun(lhs, rhs);
+    };
+  }
+
+  function objectAccessBop(bopFun) {
+    return function (iid, lhs, rhs) {
+      return replayEngine.RR_L(iid, bopFun(lhs, rhs), N_LOG_RETURN);
+    };
+  }
+
+  const bopMap = {
+    "+": arithmeticBop(function (lhs, rhs) {
+      return lhs + rhs;
+    }),
+    "-": arithmeticBop(function (lhs, rhs) {
+      return lhs - rhs;
+    }),
+    "*": arithmeticBop(function (lhs, rhs) {
+      return lhs * rhs;
+    }),
+    "/": arithmeticBop(function (lhs, rhs) {
+      return lhs / rhs;
+    }),
+    "%": arithmeticBop(function (lhs, rhs) {
+      return lhs % rhs;
+    }),
+    "<<": arithmeticBop(function (lhs, rhs) {
+      return lhs << rhs;
+    }),
+    ">>": arithmeticBop(function (lhs, rhs) {
+      return lhs >> rhs;
+    }),
+    ">>>": arithmeticBop(function (lhs, rhs) {
+      return lhs >>> rhs;
+    }),
+    "<": arithmeticBop(function (lhs, rhs) {
+      return lhs < rhs;
+    }),
+    ">": arithmeticBop(function (lhs, rhs) {
+      return lhs > rhs;
+    }),
+    "<=": arithmeticBop(function (lhs, rhs) {
+      return lhs <= rhs;
+    }),
+    ">=": arithmeticBop(function (lhs, rhs) {
+      return lhs >= rhs;
+    }),
+    "==": logicBop(function (lhs, rhs) {
+      return lhs == rhs;
+    }),
+    "!=": logicBop(function (lhs, rhs) {
+      return lhs != rhs;
+    }),
+    "===": logicBop(function (lhs, rhs) {
+      return lhs === rhs;
+    }),
+    "!==": logicBop(function (lhs, rhs) {
+      return lhs !== rhs;
+    }),
+    "&": arithmeticBop(function (lhs, rhs) {
+      return lhs & rhs;
+    }),
+    "|": arithmeticBop(function (lhs, rhs) {
+      return lhs | rhs;
+    }),
+    "^": arithmeticBop(function (lhs, rhs) {
+      return lhs ^ rhs;
+    }),
+    instanceof: objectAccessBop(function (lhs, rhs) {
+      return lhs instanceof rhs;
+    }),
+    delete: objectAccessBop(function (lhs, rhs) {
+      return delete lhs[rhs];
+    }),
+    in: objectAccessBop(function (lhs, rhs) {
+      return lhs in rhs;
+    }),
+    "&&": logicBop(function (lhs, rhs) {
+      return lhs && rhs; // FIXME
+    }),
+    "||": logicBop(function (lhs, rhs) {
+      return lhs || rhs; // FIXME
+    }),
+  };
+
   // Binary operation
   function B(iid, op, lhs, rhs) {
-    var ret;
-    var isArithmetic = false;
-
-    switch (op) {
-      case "+":
-        isArithmetic = true;
-        ret = lhs + rhs;
-        break;
-      case "-":
-        isArithmetic = true;
-        ret = lhs - rhs;
-        break;
-      case "*":
-        isArithmetic = true;
-        ret = lhs * rhs;
-        break;
-      case "/":
-        isArithmetic = true;
-        ret = lhs / rhs;
-        break;
-      case "%":
-        isArithmetic = true;
-        ret = lhs % rhs;
-        break;
-      case "<<":
-        isArithmetic = true;
-        ret = lhs << rhs;
-        break;
-      case ">>":
-        isArithmetic = true;
-        ret = lhs >> rhs;
-        break;
-      case ">>>":
-        isArithmetic = true;
-        ret = lhs >>> rhs;
-        break;
-      case "<":
-        isArithmetic = true;
-        ret = lhs < rhs;
-        break;
-      case ">":
-        isArithmetic = true;
-        ret = lhs > rhs;
-        break;
-      case "<=":
-        isArithmetic = true;
-        ret = lhs <= rhs;
-        break;
-      case ">=":
-        isArithmetic = true;
-        ret = lhs >= rhs;
-        break;
-      case "==":
-        ret = lhs == rhs;
-        break;
-      case "!=":
-        ret = lhs != rhs;
-        break;
-      case "===":
-        ret = lhs === rhs;
-        break;
-      case "!==":
-        ret = lhs !== rhs;
-        break;
-      case "&":
-        isArithmetic = true;
-        ret = lhs & rhs;
-        break;
-      case "|":
-        isArithmetic = true;
-        ret = lhs | rhs;
-        break;
-      case "^":
-        isArithmetic = true;
-        ret = lhs ^ rhs;
-        break;
-      case "instanceof":
-        ret = lhs instanceof rhs;
-        ret = replayEngine.RR_L(iid, ret, N_LOG_RETURN);
-        break;
-      case "delete":
-        ret = delete lhs[rhs];
-        ret = replayEngine.RR_L(iid, ret, N_LOG_RETURN);
-        break;
-      case "in":
-        ret = lhs in rhs;
-        ret = replayEngine.RR_L(iid, ret, N_LOG_RETURN);
-        break;
-      case "&&":
-        ret = lhs && rhs; // FIXME
-        break;
-      case "||":
-        ret = lhs || rhs; // FIXME
-        break;
-      case "regexin":
-        ret = rhs.test(lhs);
-        break;
-      default:
-        throw new Error(op + " at " + iid + " not found");
-    }
-
-    if (
-      isArithmetic &&
-      ((typeof lhs === "object" && lhs) ||
-        typeof lhs === "function" ||
-        (typeof rhs === "object" && rhs) ||
-        typeof rhs === "function")
-    ) {
-      ret = replayEngine.RR_L(iid, ret, N_LOG_OPERATION);
-    }
-
-    return ret;
+    return bopMap[op](iid, lhs, rhs);
   }
+
+  function arithmeticUop(uopFun) {
+    return function (iid, lhs) {
+      if (isObjectType[typeof lhs] && lhs) {
+        return replayEngine.RR_L(iid, uopFun(lhs), N_LOG_OPERATION);
+      } else {
+        return uopFun(lhs);
+      }
+    };
+  }
+
+  function logicUop(uopFun) {
+    return function (_, lhs) {
+      return uopFun(lhs);
+    };
+  }
+
+  const uopMap = {
+    "+": arithmeticUop(function (lhs) {
+      return +lhs;
+    }),
+    "-": arithmeticUop(function (lhs) {
+      return -lhs;
+    }),
+    "~": arithmeticUop(function (lhs) {
+      return ~lhs;
+    }),
+    "!": logicUop(function (lhs) {
+      return !lhs;
+    }),
+    typeof: logicUop(function (lhs) {
+      return typeof lhs; // FIXME
+    }),
+  };
 
   // Unary operation
   function U(iid, op, lhs) {
-    var ret;
-    var isArithmetic = false;
-
-    switch (op) {
-      case "+":
-        isArithmetic = true;
-        ret = +lhs;
-        break;
-      case "-":
-        isArithmetic = true;
-        ret = -lhs;
-        break;
-      case "~":
-        isArithmetic = true;
-        ret = ~lhs;
-        break;
-      case "!":
-        ret = !lhs;
-        break;
-      case "typeof":
-        ret = typeof lhs; // FIXME
-        break;
-      default:
-        throw new Error(op + " at " + iid + " not found");
-    }
-
-    if (
-      isArithmetic &&
-      ((typeof lhs === "object" && lhs) || typeof lhs === "function")
-    ) {
-      ret = replayEngine.RR_L(iid, ret, N_LOG_OPERATION);
-    }
-
-    return ret;
+    return uopMap[op](iid, lhs);
   }
 
   function pushSwitchKey() {
